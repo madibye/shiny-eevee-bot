@@ -1,0 +1,16 @@
+version: '3.0'
+services:
+  mongo:
+    image: mongo:4.2
+    container_name: "mongo"
+    volumes:
+      - mongo_data:/data/db
+    restart: always
+
+  princess_trixie:
+    container_name: "Princess-Trixie"
+    build: .
+    restart: always
+
+volumes:
+  mongo_data:
