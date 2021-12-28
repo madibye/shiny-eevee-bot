@@ -1,5 +1,5 @@
 from discord.ext import tasks
-from helpers import db
+from helpers import db, command_helpers
 import time
 import re
 from typing import Tuple, List
@@ -74,12 +74,6 @@ async def send_reminder(rem, bot, channel):
         )
 
 
-def remove_empty_items(items: list):
-    for _ in range(items.count("")):
-        items.remove("")
-    return items
-
-
 def make_time_delta(dt: datetime, now: datetime) -> timedelta:
     """takes a datetime object and represents it in a time delta"""
     return dt - now
@@ -91,7 +85,7 @@ def process_time_strings(now: datetime, nstrings: List[str]) -> Tuple[timedelta,
     words_to_remove = ["in", "and", "on", "at", "@"]
 
     # Regex stuff to make it so the parser does not read anything between block quotes or `` markers
-    tstrings = remove_empty_items(re.sub(r"`((?:\S+\s*)*)`", "", re.sub(r"```((?:\S+\s*)*)```", "", " ".join(nstrings))).split(" "))
+    tstrings = command_helpers.remove_empty_items(re.sub(r"`((?:\S+\s*)*)`", "", re.sub(r"```((?:\S+\s*)*)```", "", " ".join(nstrings))).split(" "))
 
     # And we also wanna remove quote markdown from the note itself
     nstrings = " ".join(nstrings).replace("```", " \n").replace("`", "").split(" ")
@@ -137,4 +131,4 @@ def process_time_strings(now: datetime, nstrings: List[str]) -> Tuple[timedelta,
 
     # return the best parse we could find,
     # along with a string of everything other than that parse.
-    return best_delta, ' '.join(remove_empty_items(nstrings))
+    return best_delta, ' '.join(command_helpers.remove_empty_items(nstrings))

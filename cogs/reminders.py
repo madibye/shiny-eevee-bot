@@ -1,5 +1,5 @@
 from discord.ext import commands
-from helpers import db, scheduler
+from helpers import db, scheduler, command_helpers
 from dateutil import tz
 from datetime import datetime
 from discord_slash import SlashContext, cog_ext
@@ -19,12 +19,7 @@ class Reminders(commands.Cog, name="Reminders"):
 
     @commands.command(name="remindme", aliases=["remind", "rm"])
     async def remindme(self, ctx: commands.Context):
-        args = ctx.message.content
-        for p in config.command_prefixes:
-            args = args.replace(f"{p}{ctx.invoked_with} ", "")
-        args_list = scheduler.remove_empty_items(
-            args.replace("\n", " \n").split(" ")
-        )
+        args_list = command_helpers.parse_args(ctx)
         if args_list:
             current_time = datetime.now(tz=tz.gettz("America/New_York"))
             total_delta, note = scheduler.process_time_strings(current_time, args_list)
@@ -68,7 +63,7 @@ class Reminders(commands.Cog, name="Reminders"):
                        options=[create_option(name="content", description="the time and note for your reminder, awa", option_type=3, required=True)]
                        )
     async def remindme_slash(self, ctx: SlashContext, content: str):
-        args_list = scheduler.remove_empty_items(
+        args_list = command_helpers.remove_empty_items(
             content.replace("\n", " \n").split(" ")
         )
         if args_list:

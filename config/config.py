@@ -13,4 +13,6 @@ command_prefixes = ['!']
 discord_token = "OTI1MDg3MzMxOTE1MDIyMzc3.YcoAtw.65ePrP26S6niILlnGv6tbzzR5bM"
 discord_cogs = [
     "cogs.reminders",
+    "cogs.type",
+    "cogs.music",
 ]
