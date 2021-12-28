@@ -8,6 +8,7 @@ from dateutil import tz
 from datetime import datetime, timedelta
 from discord_slash.utils.manage_components import create_button, create_actionrow
 from discord_slash.model import ButtonStyle
+import config
 
 '''a lot of this is copied directly from the mod server's scheduler, it may not make a ton of sense to have all these
 functions be factored out in this way just for one command, but it will make our lives a whole lot easier if we ever
@@ -78,17 +79,45 @@ def make_time_delta(dt: datetime, now: datetime) -> timedelta:
     """takes a datetime object and represents it in a time delta"""
     return dt - now
 
+def process_note(nstrings: List[str], i: int) -> List[str]:
+    # if we find that the previous index slot is a number, and the one before that is a keyword like "in",
+    if i > 1 and (nstrings[i - 1].isnumeric() and nstrings[i - 2].lower() in config.remindme_remove_words):
+        # we'll remove the last three words from the note
+        nstrings[i - 2:i + 1] = '', '', ''
+    # if the previous index slot is one or the other between a number or one of our keywords,
+    elif i > 0 and (nstrings[i - 1].isnumeric() or nstrings[i - 1].lower() in config.remindme_remove_words):
+        # we'll just remove the last two words
+        nstrings[i - 1:i + 1] = '', ''
+    # otherwise, we already know the current index slot we're on needs to be removed
+    else:
+        # so we can just remove that one
+        nstrings[i] = ''
+    # this is here in case the word after our current slot is something that won't change the time delta, like AM, PM, or a year
+    if i < len(nstrings) - 2 and (nstrings[i + 1].lower() in ["am", "pm"] or nstrings[i + 1].isnumeric()):
+        nstrings[i + 1] = ''
+    return nstrings
 
-def process_time_strings(now: datetime, nstrings: List[str]) -> Tuple[timedelta, str]:
-    """processes a list of strings/arguments, adds up all recognizable times in them"""
+def process_time_strings(now: datetime, tstrings: List[str], return_note: bool) -> Tuple[timedelta, str] or timedelta:
+    """
+    processes a list of strings/arguments, adds up all recognizable times in them, and returns a timedelta object.
+    if return_note is true, we'll also return a string with the times parsed out.
+    """
     a = Calendar()
-    words_to_remove = ["in", "and", "on", "at", "@"]
 
-    # Regex stuff to make it so the parser does not read anything between block quotes or `` markers
-    tstrings = command_helpers.remove_empty_items(re.sub(r"`((?:\S+\s*)*)`", "", re.sub(r"```((?:\S+\s*)*)```", "", " ".join(nstrings))).split(" "))
-
-    # And we also wanna remove quote markdown from the note itself
-    nstrings = " ".join(nstrings).replace("```", " \n").replace("`", "").split(" ")
+    # words_to_remove and nstrings are only referenced behind if return_note statements, so we don't need to worry about referencing them before assignment
+    if return_note:
+        # We wanna remove quote markdown from what will become the note itself
+        nstrings = " ".join(tstrings).replace("```", " \n").replace("`", "").split(" ")
+        # Regex stuff to make it so the time parsing does not read anything between block quotes or `` markers
+        tstrings = re.sub(r"`((?:\S+\s*)*)`", "", re.sub(r"```((?:\S+\s*)*)```", "", " ".join(tstrings))).split(" ")
+        for i, ts in enumerate(tstrings):
+            # We want to remove certain words we ignore for time parsing
+            if ts in config.remindme_ignore_words:
+                tstrings[i] = ""
+            # Here we're inserting blank words we removed via regex back into the list.
+            # This is to make sure we're later removing the correct objects from nstrings, it relies on iterating through tstrings, so we want both lists to be the same length
+            if tstrings[i] != nstrings[i] and tstrings[i] in nstrings:
+                tstrings.insert(i, "")
 
     # first, create an expansion of tstrings
     # converts ['1', '2', '3'] -> ['1', '1 2', '1 2 3']
@@ -109,26 +138,18 @@ def process_time_strings(now: datetime, nstrings: List[str]) -> Tuple[timedelta,
             new_delta = make_time_delta(dt, now)
 
             # if it is different than what we originally parsed,
-            if new_delta != best_delta and now < now + new_delta:
-                # we'll use that one instead.
-                best_delta = new_delta
-                # and we can start removing now-irrelevant parts of the original string itself
-                # if we find that the previous index slot is a number, and the one before that is a keyword like "in",
-                if i > 1 and (nstrings[i - 1].isnumeric() and nstrings[i - 2].lower() in words_to_remove):
-                    # we'll remove the last three words from the note
-                    tstrings[i - 2:i + 1] = '', '', ''
-                # if the previous index slot is one or the other between a number or one of our keywords,
-                elif i > 0 and (nstrings[i - 1].isnumeric() or nstrings[i - 1].lower() in words_to_remove):
-                    # we'll just remove the last two words
-                    nstrings[i - 1:i + 1] = '', ''
-                # otherwise, we already know the current index slot we're on needs to be removed
-                else:
-                    # so we can just remove that one
-                    nstrings[i] = ''
-                # this is here in case the word after our current slot is something that won't change the time delta, like AM, PM, or a year
-                if i < len(nstrings) - 2 and (nstrings[i + 1].lower() in ["am", "pm"] or nstrings[i + 1].isnumeric()):
-                    nstrings[i + 1] = ''
+            if new_delta != best_delta:
+                if now < now + new_delta:
+                    # we'll use that one instead.
+                    best_delta = new_delta
+                # this ensures that if we say something like "remindme at 12am",
+                elif now < now + new_delta + timedelta(days=1):
+                    # it will set the reminder for tomorrow morning at 12am rather than error because 12am already happened today
+                    best_delta = new_delta + timedelta(days=1)
+                if return_note:
+                    # and we can start removing now-irrelevant parts of the original string itself
+                    nstrings = process_note(nstrings, i)
 
     # return the best parse we could find,
     # along with a string of everything other than that parse.
-    return best_delta, ' '.join(command_helpers.remove_empty_items(nstrings))
+    return (best_delta, ' '.join(command_helpers.remove_empty_items(nstrings))) if return_note else best_delta

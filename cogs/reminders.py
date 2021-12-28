@@ -4,7 +4,6 @@ from dateutil import tz
 from datetime import datetime
 from discord_slash import SlashContext, cog_ext
 from discord_slash.utils.manage_commands import create_option
-import config
 
 class Reminders(commands.Cog, name="Reminders"):
     def __init__(self, bot):
@@ -22,7 +21,7 @@ class Reminders(commands.Cog, name="Reminders"):
         args_list = command_helpers.parse_args(ctx)
         if args_list:
             current_time = datetime.now(tz=tz.gettz("America/New_York"))
-            total_delta, note = scheduler.process_time_strings(current_time, args_list)
+            total_delta, note = scheduler.process_time_strings(current_time, args_list, True)
             new_time = current_time + total_delta
             if current_time < new_time:
                 await ctx.send(f"awa, i'll try to remember... {new_time.strftime('%l:%M %p on %b %d, %Y').lower()}, right?".replace('  ', ' '))
@@ -60,31 +59,28 @@ class Reminders(commands.Cog, name="Reminders"):
 
     @cog_ext.cog_slash(name="remindme",
                        description="awa, i can help you set reminders if you want :)",
-                       options=[create_option(name="content", description="the time and note for your reminder, awa", option_type=3, required=True)]
+                       options=[
+                           create_option(name="time", description="awa, the time for your reminder goes here :)", option_type=3, required=True),
+                           create_option(name="note", description="this is the note i'll try to remember to remind you about!!", option_type=3, required=False),
+                       ],
                        )
-    async def remindme_slash(self, ctx: SlashContext, content: str):
-        args_list = command_helpers.remove_empty_items(
-            content.replace("\n", " \n").split(" ")
-        )
-        if args_list:
-            current_time = datetime.now(tz=tz.gettz("America/New_York"))
-            total_delta, note = scheduler.process_time_strings(current_time, args_list)
-            new_time = current_time + total_delta
-            if current_time < new_time:
-                await ctx.send(f"awa, i'll try to remember... {new_time.strftime('%l:%M %p on %b %d, %Y').lower()}, right?".replace('  ', ' '), hidden=True)
-                await scheduler.add_to_schedule(
-                    "reminder",
-                    int(new_time.timestamp()),
-                    ctx.author.id,
-                    ctx.channel.id,
-                    "",
-                    note
-                )
-            elif current_time > new_time:
-                await ctx.send("awa, that already happened, silly goose :)", hidden=True)
-            elif current_time == new_time:
-                await ctx.send("awa...? i can't find a time here :(", hidden=True)
-        else:
+    async def remindme_slash(self, ctx: SlashContext, time: str, note: str):
+        current_time = datetime.now(tz=tz.gettz("America/New_York"))
+        total_delta = scheduler.process_time_strings(current_time, time.split(" "), False)
+        new_time = current_time + total_delta
+        if current_time < new_time:
+            await ctx.send(f"awa, i'll try to remember... {new_time.strftime('%l:%M %p on %b %d, %Y').lower()}, right?".replace('  ', ' '), hidden=True)
+            await scheduler.add_to_schedule(
+                "reminder",
+                int(new_time.timestamp()),
+                ctx.author.id,
+                ctx.channel.id,
+                "",
+                note
+            )
+        elif current_time > new_time:
+            await ctx.send("awa, that already happened, silly goose :)", hidden=True)
+        elif current_time == new_time:
             await ctx.send("awa...? i can't find a time here :(", hidden=True)
 
 
