@@ -292,7 +292,7 @@ class Music(commands.Cog):
         ctx.voice_state = self.get_voice_state(ctx)
 
     async def cog_command_error(self, ctx: commands.Context, error: commands.CommandError):
-        await ctx.send("oopsie... something seems to have gone wrong?? awa, whatever this is might help... \n {}".format(str(error)))
+        await ctx.send(f"oopsie... something seems to have gone wrong?? awa, whatever this is might help... \n {str(error)[:3900]}")
 
     @commands.command(name='join', invoke_without_subcommand=True)
     async def _join(self, ctx: commands.Context):
