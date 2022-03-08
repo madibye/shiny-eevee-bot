@@ -10,6 +10,10 @@ services:
   princess_trixie:
     container_name: "Princess-Trixie"
     build: .
+    depends_on:
+      - mongo
+    environment:
+      - PRINCESS_TRIXIE_TOKEN=${PRINCESS_TRIXIE_TOKEN}
     restart: always
 
 volumes:
