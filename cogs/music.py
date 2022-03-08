@@ -292,7 +292,7 @@ class Music(commands.Cog):
         ctx.voice_state = self.get_voice_state(ctx)
 
     async def cog_command_error(self, ctx: commands.Context, error: commands.CommandError):
-        await ctx.send('An error occurred: {}'.format(str(error)))
+        await ctx.send("oopsie... something seems to have gone wrong?? awa, whatever this is might help... \n {}".format(str(error)))
 
     @commands.command(name='join', invoke_without_subcommand=True)
     async def _join(self, ctx: commands.Context):
@@ -328,7 +328,7 @@ class Music(commands.Cog):
         """Clears the queue and leaves the voice channel."""
 
         if not ctx.voice_state.voice:
-            return await ctx.send('Not connected to any voice channel.')
+            return await ctx.send("hehe, i already left!!")
 
         await ctx.voice_state.stop()
         del self.voice_states[ctx.guild.id]
@@ -338,13 +338,13 @@ class Music(commands.Cog):
         """Sets the volume of the player."""
 
         if not ctx.voice_state.is_playing:
-            return await ctx.send('Nothing being played at the moment.')
+            return await ctx.send("i don't think i'm playing anything at the moment!")
 
         if 0 > volume > 100:
-            return await ctx.send('Volume must be between 0 and 100')
+            return await ctx.send("awa, i think you need to give a number between 1 and 100? at least that's what madi told me once.")
 
         ctx.voice_state.volume = volume / 100
-        await ctx.send('Volume of the player set to {}%'.format(volume))
+        await ctx.send("okie i set the volume! it's now at {} percent i think".format(volume))
 
     @commands.command(name='now', aliases=['current', 'playing'])
     async def _now(self, ctx: commands.Context):
@@ -388,7 +388,7 @@ class Music(commands.Cog):
         """
 
         if not ctx.voice_state.is_playing:
-            return await ctx.send('Not playing any music right now...')
+            return await ctx.send("hi um i don't think i'm playing any music right now, awa...")
 
         voter = ctx.message.author
         if voter == ctx.voice_state.current.requester:
@@ -403,10 +403,10 @@ class Music(commands.Cog):
                 await ctx.message.add_reaction('⏭')
                 ctx.voice_state.skip()
             else:
-                await ctx.send('Skip vote added, currently at **{}/3**'.format(total_votes))
+                await ctx.send('okie dokie, i added your skip vote!! that makes **{}/3**'.format(total_votes))
 
         else:
-            await ctx.send('You have already voted to skip this song.')
+            await ctx.send("heeyyyyy, you can't vote twice!!! that's mean, i think...")
 
     @commands.command(name='queue')
     async def _queue(self, ctx: commands.Context, *, page: int = 1):
@@ -415,7 +415,7 @@ class Music(commands.Cog):
         """
 
         if len(ctx.voice_state.songs) == 0:
-            return await ctx.send('Empty queue.')
+            return await ctx.send("oh um i think the queue is empty?")
 
         items_per_page = 10
         pages = math.ceil(len(ctx.voice_state.songs) / items_per_page)
@@ -436,7 +436,7 @@ class Music(commands.Cog):
         """Shuffles the queue."""
 
         if len(ctx.voice_state.songs) == 0:
-            return await ctx.send('Empty queue.')
+            return await ctx.send('oh um i think the queue is empty?')
 
         ctx.voice_state.songs.shuffle()
         await ctx.message.add_reaction('✅')
@@ -446,7 +446,7 @@ class Music(commands.Cog):
         """Removes a song from the queue at a given index."""
 
         if len(ctx.voice_state.songs) == 0:
-            return await ctx.send('Empty queue.')
+            return await ctx.send('oh um i think the queue is empty?')
 
         ctx.voice_state.songs.remove(index - 1)
         await ctx.message.add_reaction('✅')
@@ -480,22 +480,22 @@ class Music(commands.Cog):
             try:
                 source = await YTDLSource.create_source(ctx, search, loop=self.bot.loop)
             except YTDLError as e:
-                await ctx.send('An error occurred while processing this request: {}'.format(str(e)))
+                await ctx.send("oopsie... something seems to have gone wrong?? awa, whatever this is might help... \n{}".format(str(e)))
             else:
                 song = Song(source)
 
                 await ctx.voice_state.songs.put(song)
-                await ctx.send('Enqueued {}'.format(str(source)))
+                await ctx.send("i added a song to the queue, awa!! looks like it's called {}!!".format(str(source)))
 
     @_join.before_invoke
     @_play.before_invoke
     async def ensure_voice_state(self, ctx: commands.Context):
         if not ctx.author.voice or not ctx.author.voice.channel:
-            raise commands.CommandError('You are not connected to any voice channel.')
+            raise commands.CommandError('awa, where do i go?? you have to show me a voice chat to hop in!!')
 
         if ctx.voice_client:
             if ctx.voice_client.channel != ctx.author.voice.channel:
-                raise commands.CommandError('Bot is already in a voice channel.')
+                raise commands.CommandError("awa, i'm a bit busy in another voice chat... sorry :(")
 
 
 def setup(client):
