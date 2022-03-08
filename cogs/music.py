@@ -292,8 +292,8 @@ class Music(commands.Cog):
         ctx.voice_state = self.get_voice_state(ctx)
 
     async def cog_command_error(self, ctx: commands.Context, error: commands.CommandError):
-        await ctx.send(f"oopsie... something seems to have gone wrong?? awa, whatever this is might help... \n"
-                       f"{str(error)[:1800]}\n"
+        await ctx.send(f"oopsie... something seems to have gone wrong?? awa, whatever this is might help..."
+                       f"```{str(error)[:1800]}```"
                        f"{'...oopsie, the error got cut off, it looks like :(' if len(str(error)) > 1800 else ''}")
 
     @commands.command(name='join', invoke_without_subcommand=True)
