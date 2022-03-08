@@ -13,7 +13,7 @@ command_prefixes = ['!']
 remindme_ignore_words = ["this"]
 remindme_remove_words = ["in", "and", "on", "at", "@"]
 
-discord_token = "OTI1MDg3MzMxOTE1MDIyMzc3.YcoAtw.65ePrP26S6niILlnGv6tbzzR5bM"
+discord_token = os.environ.get("PRINCESS_TRIXIE_TOKEN")
 discord_cogs = [
     "cogs.reminders",
     "cogs.type",
