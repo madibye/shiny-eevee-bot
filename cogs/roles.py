@@ -42,7 +42,7 @@ class Roles(commands.Cog, name="roles"):
             return
         color, name = ModalComponentData(role_modal.interaction).value
         custom_roles_db = db.get_custom_roles()
-        if interaction.user.id not in custom_roles_db:
+        if str(interaction.user.id) not in custom_roles_db:
             if not name:
                 name = interaction.user.display_name
             try:

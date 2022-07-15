@@ -54,7 +54,7 @@ def create_custom_role_list():
     db_roles.insert_one(roles_doc)
     return roles_doc
 
-def edit_custom_role(user_id, role_id):
+def edit_custom_role(user_id: str, role_id: int):
     roles_doc = db_roles.find_one({"_id": "custom_roles"})
     if not roles_doc:
         roles_doc = create_custom_role_list()
