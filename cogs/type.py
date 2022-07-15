@@ -1,15 +1,16 @@
-import discord
-from discord.ext import commands
+from discord import Object, Embed
+from discord.ext.commands import Context, Cog, command
 from helpers import command_helpers
 from helpers.type_matchups import type_list, PType
 from typing import List, Dict
+import config
 
-class Type(commands.Cog, name="Type"):
+class Type(Cog, name="Type"):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="weakness", aliases=["weak", "w"])
-    async def weakness(self, ctx: commands.Context):
+    @command(name="weakness", aliases=["weak", "w"])
+    async def weakness(self, ctx: Context):
         types: List[str] = command_helpers.remove_empty_items(
             " ".join(command_helpers.parse_args(ctx)).replace("/", " ").lower().split(" ")
         )
@@ -23,7 +24,7 @@ class Type(commands.Cog, name="Type"):
             current_type_matchup[type_name] = 1
         for t in types:
             if t not in current_type_matchup.keys():
-                return await ctx.send("awa, looks like there's something wrong with the list of types you gave me...")
+                return await ctx.send("looks like there's something wrong with the list of types you gave me...")
             ptype: PType = type_list[t]
             for w in ptype.weak:
                 current_type_matchup[w] *= 2
@@ -47,11 +48,11 @@ class Type(commands.Cog, name="Type"):
             elif current_type_matchup[key] == 0:
                 matchup_lists["Immunities"] += f"{cap_name}, "
         clean_typing = f"{types[0].capitalize()}/{types[1].capitalize()}" if len(types) == 2 else types[0].capitalize()
-        embed = discord.Embed(title="**Type Matchups**", description=f"{clean_typing}-type")
+        embed = Embed(title="**Type Matchups**", description=f"{clean_typing}-type")
         for key in matchup_lists:
             if len(matchup_lists[key]) > 0:
                 embed.add_field(name=key, value=matchup_lists[key][0:-2], inline=False)
-        return await ctx.send(content="awa, look, i found this, maybe this will be helpful!! :)", embed=embed)
+        return await ctx.send(embed=embed)
 
 def setup(client):
-    client.add_cog(Type(client))
+    await client.add_cog(Type(client), guild=Object(id=config.guild_id))
