@@ -1,6 +1,6 @@
 import traceback
 
-from discord import Status, Intents, Object
+from discord import Game, Intents, Object
 from discord.ext.commands import Bot
 from termcolor import cprint
 
@@ -26,7 +26,7 @@ class PrincessTrixie(Bot):
     @staticmethod
     async def on_ready():
         cprint(f"I've logged in as {bot.user.name}. I'm ready to go!", "green")
-        await bot.change_presence(status=Status("hiiiiiii :)"))
+        await bot.change_presence(activity=Game(name="hiiiiiii :)"))
 
 
 if __name__ == "__main__":
