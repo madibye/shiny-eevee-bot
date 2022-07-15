@@ -1,9 +1,10 @@
+from typing import Optional
+from discord import Guild, app_commands, Object
+from discord.ext import commands
+
 import config
 from helpers.component_globals import *
 from helpers import db
-
-from discord import Guild, app_commands, Object
-from discord.ext import commands
 
 class Roles(commands.Cog, name="roles"):
     def __init__(self, bot):
@@ -14,54 +15,26 @@ class Roles(commands.Cog, name="roles"):
     async def on_ready(self):
         self.guild = self.bot.get_guild(config.guild_id)
 
-    @app_commands.command(name="customrole", description="Set your own custom role color with this nice little slash command!")
-    async def custom_role(self, interaction: Interaction):
-        role_modal = ModularModal(
-            timeout=1200,
-            title="Custom Role",
-            inputs=[TextInputInfo(
-                label='Color',
-                style=TextStyle.short,
-                placeholder='Type out a color code here...',
-                max_length=7,
-                required=True,
-                custom_id="color"
-            ), TextInputInfo(
-                label='Role Name',
-                style=TextStyle.short,
-                placeholder='Leave this blank if you don\'t want to change the name..',
-                max_length=100,
-                required=False,
-                custom_id="name"
-            )]
-        )
-        await interaction.response.send_modal(role_modal)
-
-        timed_out = await role_modal.wait()  # Wait for stop() or timeout
-        if timed_out:
-            return
-        color, name = ModalComponentData(role_modal.interaction).value
+    @app_commands.command(name="customrole", description="set your own custom role color with this nice little slash command :)")
+    @app_commands.describe(color="the hex color for your role. you can leave out the # if you like. set to 0 to clear color!",
+                           name="the name for your role. leave it blank if you don't wanna change it!")
+    async def custom_role(self, interaction: Interaction, color: Optional[str], name=Optional[str]):
+        if not name and not color:
+            return await interaction.response.send_message(f"oh okay... but nothing changed :(", ephemeral=True)
         custom_roles_db = db.get_custom_roles()
         if str(interaction.user.id) not in custom_roles_db or not custom_roles_db.get(str(interaction.user.id)):
             if not name:
                 name = interaction.user.display_name
-            try:
-                role = await self.guild.create_role(name=name)
-                await role.edit(position=20)
-            except Exception as e:
-                print(e)
-                return await role_modal.interaction.response.send_message("sorry, it looks like the name was invalid :(", ephemeral=True)
+            role = await self.guild.create_role(name=name)
+            await role.edit(position=20)
             await interaction.user.add_roles(role)
             db.edit_custom_role(str(interaction.user.id), role.id)
         else:
-            print(custom_roles_db[str(interaction.user.id)])
             role = self.guild.get_role(custom_roles_db[str(interaction.user.id)])
-        try:
-            await role.edit(colour=int(color.replace('#', ''), base=16))
-        except Exception as e:
-            print(e)
-            return await role_modal.interaction.response.send_message("sorry, it looks like the color was invalid :(", ephemeral=True)
-        return await role_modal.interaction.response.send_message(f"your custom role has been set to <@&{role.id}>", ephemeral=True)
+            if name:
+                await role.edit(name=name)
+        await role.edit(colour=int(color.replace('#', ''), base=16))
+        return await interaction.response.send_message(f"your custom role has been set to <@&{role.id}>!", ephemeral=True)
 
     @commands.command(name="setcustomrole", aliases=["scr"])
     @commands.has_role("alpha koala")
