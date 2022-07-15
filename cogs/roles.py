@@ -60,7 +60,7 @@ class Roles(commands.Cog, name="roles"):
 
     @commands.command(name="setcustomrole", aliases=["scr"])
     @commands.has_role("alpha koala")
-    def set_custom_role(self, ctx: Context, user_id: int, role_id: int):
+    async def set_custom_role(self, ctx: Context, user_id: int, role_id: int):
         if ctx.channel.id != 997571188727492749:
             return
         db.edit_custom_role(user_id, role_id)
