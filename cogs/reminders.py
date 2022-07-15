@@ -23,15 +23,15 @@ class Reminders(commands.Cog, name="Reminders"):
     @commands.command(name="remindme", aliases=["remind", "rm"])
     async def remindme(self, ctx, *, time_and_note):
         if isinstance(ctx.channel, DMChannel):
-            return await ctx.send("Sorry, you can't use my DMs to set reminders! "
-                                  "Feel free to use the slash command `/remindme` instead if you'd like your reminder to be private!")
+            return await ctx.send("sorry, the reminder command won't work in DMs :( "
+                                  "you can use the slash command `/remindme` instead if you want your reminder to be private!")
         if time_and_note:
             time_and_note_list = scheduler.remove_empty_items(time_and_note.replace("\n", " \n").split(" "))
             current_time = datetime.now(tz=tz.gettz("America/New_York"))
             total_delta, note = scheduler.process_time_strings(current_time, time_and_note_list, True)
             new_time = current_time + total_delta
             if current_time < new_time:
-                await ctx.send(f"Okie, I'll remind you at {new_time.strftime('%l:%M %p on %b %d, %Y')}!".replace('  ', ' '))
+                await ctx.send(f"okay, i'll remind you at {new_time.strftime('%l:%M %p on %b %d, %Y')}!".replace('  ', ' '))
                 # Now time to make the DB entry
                 await scheduler.add_to_schedule(
                     "reminder",
@@ -42,11 +42,11 @@ class Reminders(commands.Cog, name="Reminders"):
                     note
                 )
             elif current_time > new_time:
-                await ctx.send("I can't remind you about something that already happened!")
+                await ctx.send("that already happened, silly goose!")
             elif current_time == new_time:
-                await ctx.send("Sorry, I couldn't find when you wanted me to set this reminder for!")
+                await ctx.send("sorry, i can't find a time here :(")
         else:
-            await ctx.send("Sorry, I couldn't find when you wanted me to set this reminder for!")
+            await ctx.send("sorry, i can't find a time here :(")
 
     @commands.command(name="remindmecancel", aliases=["remindercancel", "rmc"])
     async def remindme_cancel(self, ctx):
@@ -56,14 +56,13 @@ class Reminders(commands.Cog, name="Reminders"):
                 if reminder['target'] == ctx.author.id:
                     await ctx.message.reference.resolved.add_reaction("❌")
                     db.delete_reminder(reminder)
-                    await ctx.send("Okie, I won't remind you about that, then!")
+                    await ctx.send("that's okay, i won't remind you about that then!")
                 else:
-                    await ctx.send("Hey, don't delete other people's reminders! That's mean!")
+                    await ctx.send("hey, don't delete other people's reminders! that's mean :(")
             else:
-                await ctx.send("I couldn't find any reminders here! Either you didn't reply to a message containing a "
-                               "reminder, or the reminder already went off!")
+                await ctx.send("you have to reply to a message containing a reminder, silly goose")
         else:
-            await ctx.send("To cancel a reminder, you need to reply to a message containing a reminder!")
+            await ctx.send("you have to reply to a message containing a reminder, silly goose")
 
     @app_commands.command(name="remindme", description="Need a reminder set? I'll be happy to help!")
     @app_commands.describe(time="The time for your reminder", note="The note for your reminder")
@@ -72,7 +71,7 @@ class Reminders(commands.Cog, name="Reminders"):
         total_delta = scheduler.process_time_strings(current_time, time.split(" "), False)
         new_time = current_time + total_delta
         if current_time < new_time:
-            await interaction.response.send_message(f"Okie, I'll remind you at {new_time.strftime('%l:%M %p on %b %d, %Y')}!".replace('  ', ' '), ephemeral=True)
+            await interaction.response.send_message(f"okay, i'll remind you at {new_time.strftime('%l:%M %p on %b %d, %Y')}!".replace('  ', ' '), ephemeral=True)
             await scheduler.add_to_schedule(
                 "reminder",
                 int(new_time.timestamp()),
@@ -82,9 +81,9 @@ class Reminders(commands.Cog, name="Reminders"):
                 note
             )
         elif current_time > new_time:
-            await interaction.response.send_message("I can't remind you about something that already happened!", ephemeral=True)
+            await interaction.response.send_message("that already happened, silly goose!", ephemeral=True)
         elif current_time == new_time:
-            await interaction.response.send_message("Sorry, I couldn't find when you wanted me to set this reminder for!", ephemeral=True)
+            await interaction.response.send_message("sorry, i can't find a time here :(", ephemeral=True)
 
 
 async def setup(client):
