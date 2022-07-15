@@ -16,8 +16,6 @@ slash = SlashCommand(bot, sync_commands=True, sync_on_cog_reload=True)
 @bot.event
 async def on_ready():
     cprint(f"I've logged in as {bot.user.name}. I'm ready to go!", "green")
-    for guild in bot.guilds:
-        print(f"{guild.name} ({guild.id}): {[member.name for member in guild.members]}")
     await bot.change_presence(activity=Game(name=config.activity_text))
 
 if __name__ == "__main__":
