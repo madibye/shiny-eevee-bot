@@ -18,7 +18,7 @@ class Roles(commands.Cog, name="roles"):
     @app_commands.command(name="customrole", description="set your own custom role color with this nice little slash command :)")
     @app_commands.describe(color="the hex color for your role. you can leave out the # if you like. set to 0 to clear color!",
                            name="the name for your role. leave it blank if you don't wanna change it!")
-    async def custom_role(self, interaction: Interaction, color: Optional[str], name=Optional[str]):
+    async def custom_role(self, interaction: Interaction, color: Optional[str], name: Optional[str]):
         if not name and not color:
             return await interaction.response.send_message(f"oh okay... but nothing changed :(", ephemeral=True)
         custom_roles_db = db.get_custom_roles()
