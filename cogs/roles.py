@@ -48,7 +48,8 @@ class Roles(commands.Cog, name="roles"):
             try:
                 role = await self.guild.create_role(name=name)
                 await role.edit(position=20)
-            except:
+            except Exception as e:
+                print(e)
                 return await role_modal.interaction.response.send_message("sorry, it looks like the name was invalid :(", ephemeral=True)
             await interaction.user.add_roles(role)
             db.edit_custom_role(str(interaction.user.id), role.id)
