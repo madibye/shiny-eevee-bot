@@ -9,7 +9,6 @@ class Threads(commands.Cog, name="Threads"):
         self.bot: commands.Bot = bot
 
     @commands.command(name="threadkeepalive", aliases=["tka"])
-    @commands.has_any_role("Discord Manager", "Lead Assistant")
     async def thread_keep_alive(self, ctx: Context):
         if not isinstance(ctx.channel, Thread):
             return await ctx.send("To keep a thread alive, use this command in a thread!")
