@@ -47,7 +47,7 @@ class Roles(commands.Cog, name="roles"):
                 name = interaction.user.display_name
             try:
                 role = await self.guild.create_role(name=name)
-                await role.edit(position=4)
+                await role.edit(position=20)
             except:
                 return await role_modal.interaction.response.send_message("sorry, it looks like the name was invalid :(", ephemeral=True)
             await interaction.user.add_roles(role)
@@ -56,7 +56,8 @@ class Roles(commands.Cog, name="roles"):
             role = self.guild.get_role(custom_roles_db[str(interaction.user.id)])
         try:
             await role.edit(colour=color)
-        except:
+        except Exception as e:
+            print(e)
             return await role_modal.interaction.response.send_message("sorry, it looks like the color was invalid :(", ephemeral=True)
 
     @commands.command(name="setcustomrole", aliases=["scr"])
