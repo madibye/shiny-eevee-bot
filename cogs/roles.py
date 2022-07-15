@@ -50,9 +50,9 @@ class Roles(commands.Cog, name="roles"):
             except:
                 return await role_modal.interaction.response.send_message("sorry, it looks like the name was invalid :(", ephemeral=True)
             await interaction.user.add_roles(role)
-            db.edit_custom_role(interaction.user.id, role.id)
+            db.edit_custom_role(str(interaction.user.id), role.id)
         else:
-            role = self.guild.get_role(custom_roles_db[interaction.user.id])
+            role = self.guild.get_role(custom_roles_db[str(interaction.user.id)])
         try:
             await role.edit(colour=color)
         except:
@@ -60,10 +60,10 @@ class Roles(commands.Cog, name="roles"):
 
     @commands.command(name="setcustomrole", aliases=["scr"])
     @commands.has_role("alpha koala")
-    async def set_custom_role(self, ctx: Context, user_id: str, role_id: int):
+    async def set_custom_role(self, ctx: Context, user_id: int, role_id: int):
         if ctx.channel.id != 997571188727492749:
             return
-        db.edit_custom_role(user_id, role_id)
+        db.edit_custom_role(str(user_id), role_id)
         return await ctx.send(f"Set <@{user_id}>'s custom role to <@&{role_id}>!")
 
 
