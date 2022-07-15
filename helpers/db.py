@@ -4,7 +4,7 @@ import config
 mongo_client = MongoClient(config.mongo_url)
 database = mongo_client.staff_bot  # Database
 db_reminders = database.reminders  # Mongo Collection
-db_threads = database.threads
+db_threads = database.thread
 db_roles = database.roles
 
 
