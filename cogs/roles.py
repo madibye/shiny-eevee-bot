@@ -2,7 +2,7 @@ import config
 from helpers.component_globals import *
 from helpers import db
 
-from discord import Role, Guild, app_commands, Object
+from discord import Guild, app_commands, Object
 from discord.ext import commands
 
 class Roles(commands.Cog, name="roles"):
@@ -57,7 +57,7 @@ class Roles(commands.Cog, name="roles"):
             print(custom_roles_db[str(interaction.user.id)])
             role = self.guild.get_role(custom_roles_db[str(interaction.user.id)])
         try:
-            await role.edit(colour=color)
+            await role.edit(colour=int(color, base=16))
         except Exception as e:
             print(e)
             return await role_modal.interaction.response.send_message("sorry, it looks like the color was invalid :(", ephemeral=True)
