@@ -42,7 +42,7 @@ class Roles(commands.Cog, name="roles"):
             return
         color, name = ModalComponentData(role_modal.interaction).value
         custom_roles_db = db.get_custom_roles()
-        if str(interaction.user.id) not in custom_roles_db:
+        if str(interaction.user.id) not in custom_roles_db or not custom_roles_db.get(str(interaction.user.id)):
             if not name:
                 name = interaction.user.display_name
             try:
@@ -53,6 +53,7 @@ class Roles(commands.Cog, name="roles"):
             await interaction.user.add_roles(role)
             db.edit_custom_role(str(interaction.user.id), role.id)
         else:
+            print(custom_roles_db[str(interaction.user.id)])
             role = self.guild.get_role(custom_roles_db[str(interaction.user.id)])
         try:
             await role.edit(colour=color)
