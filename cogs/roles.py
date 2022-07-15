@@ -47,6 +47,7 @@ class Roles(commands.Cog, name="roles"):
                 name = interaction.user.display_name
             try:
                 role = await self.guild.create_role(name=name)
+                await role.edit(position=4)
             except:
                 return await role_modal.interaction.response.send_message("sorry, it looks like the name was invalid :(", ephemeral=True)
             await interaction.user.add_roles(role)
