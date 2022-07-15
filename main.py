@@ -21,8 +21,8 @@ class PrincessTrixie(Bot):
             except Exception as error:
                 traceback.print_exc()
                 cprint(f"Cog {extension} could not be loaded for reason: {error}", "red")
+        bot.tree.clear_commands(guild=Object(id=config.guild_id))
         await bot.tree.sync(guild=Object(id=config.guild_id))  # Sync our slash commands
-        bot.tree.remove_command("remindme", guild=Object(id=config.guild_id))
 
     @staticmethod
     async def on_ready():
