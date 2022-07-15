@@ -20,4 +20,6 @@ bot_application_id = 925087331915022377
 discord_cogs = [
     "cogs.reminders",
     "cogs.type",
+    "cogs.threads",
+    "cogs.roles",
 ]
