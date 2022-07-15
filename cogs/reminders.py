@@ -19,6 +19,8 @@ class Reminders(commands.Cog, name="Reminders"):
     @commands.command(name="remindme", aliases=["remind", "rm"])
     async def remindme(self, ctx: commands.Context):
         args_list = command_helpers.parse_args(ctx)
+        r_list = await db.get_all_reminders()
+        print(r_list)
         if args_list:
             current_time = datetime.now(tz=tz.gettz("America/New_York"))
             total_delta, note = scheduler.process_time_strings(current_time, args_list, True)
