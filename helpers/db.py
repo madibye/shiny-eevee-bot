@@ -41,9 +41,7 @@ def remove_keep_alive_thread(thread_id):
         return db_threads.replace_one({"_id": "keep_alive_threads"}, thread_list_doc)
 
 def get_keep_alive_threads():
-    thread_list_doc = db_threads.find_one({"_id": "keep_alive_threads"})
-    if not thread_list_doc:
-        thread_list_doc = create_thread_keep_alive_list()
+    thread_list_doc = create_thread_keep_alive_list()
     return thread_list_doc["threads"]
 
 def create_custom_role_list():
@@ -62,7 +60,7 @@ def edit_custom_role(user_id: str, role_id: int):
     return db_roles.replace_one({"_id": "custom_roles"}, roles_doc)
 
 def get_custom_roles():
-    roles_doc = db_threads.find_one({"_id": "keep_alive_threads"})
+    roles_doc = db_threads.find_one({"_id": "custom_roles"})
     if not roles_doc:
         roles_doc = create_custom_role_list()
     return roles_doc["role_ids"]
