@@ -57,10 +57,11 @@ class Roles(commands.Cog, name="roles"):
             print(custom_roles_db[str(interaction.user.id)])
             role = self.guild.get_role(custom_roles_db[str(interaction.user.id)])
         try:
-            await role.edit(colour=int(color, base=16))
+            await role.edit(colour=int(color.replace('#', ''), base=16))
         except Exception as e:
             print(e)
             return await role_modal.interaction.response.send_message("sorry, it looks like the color was invalid :(", ephemeral=True)
+        return await role_modal.interaction.response.send_message(f"your custom role has been set to <@&{role.id}>", ephemeral=True)
 
     @commands.command(name="setcustomrole", aliases=["scr"])
     @commands.has_role("alpha koala")
