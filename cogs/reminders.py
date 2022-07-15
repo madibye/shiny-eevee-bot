@@ -64,8 +64,8 @@ class Reminders(commands.Cog, name="Reminders"):
         else:
             await ctx.send("you have to reply to a message containing a reminder, silly goose")
 
-    @app_commands.command(name="remindme", description="Need a reminder set? I'll be happy to help!")
-    @app_commands.describe(time="The time for your reminder", note="The note for your reminder")
+    @app_commands.command(name="remindme", description="happy to help with all your reminder needs :)")
+    @app_commands.describe(time="the time for your reminder", note="the note for your reminder")
     async def remindme_slash(self, interaction: Interaction, time: str, note: str):
         current_time = datetime.now(tz=tz.gettz("America/New_York"))
         total_delta = scheduler.process_time_strings(current_time, time.split(" "), False)
