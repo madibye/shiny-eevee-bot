@@ -54,5 +54,5 @@ class Type(Cog, name="Type"):
                 embed.add_field(name=key, value=matchup_lists[key][0:-2], inline=False)
         return await ctx.send(embed=embed)
 
-def setup(client):
+async def setup(client):
     await client.add_cog(Type(client), guild=Object(id=config.guild_id))
