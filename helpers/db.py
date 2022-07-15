@@ -60,7 +60,7 @@ def edit_custom_role(user_id: str, role_id: int):
     return db_roles.replace_one({"_id": "custom_roles"}, roles_doc)
 
 def get_custom_roles():
-    roles_doc = db_threads.find_one({"_id": "custom_roles"})
+    roles_doc = db_roles.find_one({"_id": "custom_roles"})
     if not roles_doc:
         roles_doc = create_custom_role_list()
     return roles_doc["role_ids"]
