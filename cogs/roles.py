@@ -33,7 +33,8 @@ class Roles(commands.Cog, name="roles"):
             role = self.guild.get_role(custom_roles_db[str(interaction.user.id)])
             if name:
                 await role.edit(name=name)
-        await role.edit(colour=int(color.replace('#', ''), base=16))
+        if color:
+            await role.edit(colour=int(color.replace('#', ''), base=16))
         return await interaction.response.send_message(f"your custom role has been set to <@&{role.id}>!", ephemeral=True)
 
     @commands.command(name="setcustomrole", aliases=["scr"])
