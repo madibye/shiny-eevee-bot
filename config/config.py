@@ -12,6 +12,11 @@ mongo_url = os.environ.get("MONGO_URL", "mongodb://mongo/")
 activity_text = "hi hi :)"
 command_prefixes = ['!']
 
+# Roles
+ccgse_notif_role = 996963548959871069
+minecraft_notif_role = 1007714356189991083
+club_notif_role = 1007714385642393655
+
 remindme_ignore_words = ["this"]
 remindme_remove_words = ["in", "and", "on", "at", "@"]
 
@@ -22,4 +27,5 @@ discord_cogs = [
     "cogs.type",
     "cogs.threads",
     "cogs.roles",
+    "cogs.notifications",
 ]

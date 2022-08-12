@@ -6,7 +6,7 @@ import json
 
 import config
 from dateutil import tz
-from discord import Forbidden, Guild, ButtonStyle
+from discord import Forbidden, Guild, ButtonStyle, Role, Member
 from discord.ext import tasks
 from discord.ext.commands.context import Context
 from discord.ui import Button
@@ -126,6 +126,16 @@ async def send_shift_announcement(note, channel, url, redis):
         "url": announcement_msg.jump_url,
     }))
 
+async def sub(target: Member, notif_role: Role, msg_end: str, unsub: bool = False) -> str:
+    if unsub and notif_role in target.roles:
+        await target.remove_roles(notif_role)
+        return f"You have been unsubscribed from notifications for {msg_end}."
+    elif not unsub and notif_role not in target.roles:
+        await target.add_roles(notif_role)
+        return f"You have been subscribed to notifications for {msg_end}."
+    else:
+        return f"You {'are not currently' if unsub else 'are already'} subscribed to notifications for {msg_end}!"
+
 def remove_empty_items(items: list):
     for _ in range(items.count("")):
         items.remove("")
@@ -144,11 +154,9 @@ async def replace_tags_with_mentions(note: str, guild: Guild) -> str:
         )
     return note
 
-
 def make_time_delta(dt: datetime, now: datetime) -> timedelta:
     """takes a datetime object and represents it in a time delta"""
     return dt - now
-
 
 def process_note(nstrings: List[str], i: int) -> List[str]:
     # if we find that the previous index slot is a number, and the one before that is a keyword like "in",
@@ -167,7 +175,6 @@ def process_note(nstrings: List[str], i: int) -> List[str]:
     if i < len(nstrings) - 2 and (nstrings[i + 1].lower() in ["am", "pm"] or nstrings[i + 1].isnumeric()):
         nstrings[i + 1] = ''
     return nstrings
-
 
 def process_time_strings(now: datetime, tstrings: List[str], return_note: bool = False) -> Union[Tuple[timedelta, str], timedelta]:
     """
