@@ -39,14 +39,14 @@ class RolePicker(commands.Cog, name="role_picker"):
     async def on_ready(self):
         self.guild = self.bot.get_guild(guild_id)
 
-    @commands.has_any_role("Discord Manager", "Bot Developer")
+    @commands.has_role(991519471686668358)
     @commands.command(name="refresh", aliases=["rpr"])
     async def refresh(self, ctx: Context, *args):
         refreshed = await self.role_picker_refresh(*args)
         await ctx.send("i refreshed the role pickers for you! :)" if refreshed else
                        "couldn't find any role pickers with that name :(", reference=ctx.message)
 
-    @commands.has_any_role("Discord Manager", "Bot Developer")
+    @commands.has_role(991519471686668358)
     @commands.command(name="viewrolepickers", aliases=["viewrolepickerinfo", "vrpi", "vrp"])
     async def view_role_picker_info(self, ctx: Context):
         info_embeds = []
@@ -67,7 +67,7 @@ class RolePicker(commands.Cog, name="role_picker"):
         p = paginator.Paginator(ctx, info_embeds, self.bot)
         await p.paginate()
 
-    @commands.has_any_role("Discord Manager", "Bot Developer")
+    @commands.has_role(991519471686668358)
     @commands.command(name="addrolepicker", aliases=["arp"])
     async def add_role_picker(self, ctx: Context, key: str):
         role_picker_list = await db.get_role_picker_db()
@@ -81,7 +81,7 @@ class RolePicker(commands.Cog, name="role_picker"):
             f"use `!editrolepicker` to set its properties before `!refresh`ing it into existence, pleeeease :)",
             reference=ctx.message)
 
-    @commands.has_any_role("Discord Manager", "Bot Developer")
+    @commands.has_role(991519471686668358)
     @commands.command(name="removerolepicker", aliases=["killrolepicker", "krp", "rrp"])
     async def remove_role_picker(self, ctx: Context, key: str):
         role_picker_list = await db.get_role_picker_db()
@@ -92,7 +92,7 @@ class RolePicker(commands.Cog, name="role_picker"):
         await db.set_role_picker_db(role_picker_list)
         return await ctx.send(f"okay, i deleted the role picker with the ID of {key}... sad to see it go :(", reference=ctx.message)
 
-    @commands.has_any_role("Discord Manager", "Bot Developer")
+    @commands.has_role(991519471686668358)
     @commands.command(name="editrolepicker", aliases=["editrp", "erp"])
     async def edit_role_picker(self, ctx: Context, key: str, value: str, *, args: str):
         role_picker_list = await db.get_role_picker_db()
