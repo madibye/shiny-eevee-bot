@@ -34,4 +34,4 @@ class MadiBot(Bot):
 
 if __name__ == "__main__":
     bot = MadiBot()
-    bot.run(config.discord_token)
+    bot.run(config.discord_token, log_level=40)
