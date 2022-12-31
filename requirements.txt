@@ -1,6 +1,6 @@
-git+https://github.com/Rapptz/discord.py.git@5c2431d5435d8a921a83cc05de29968f22a777ef
-termcolor==1.1.0
-python-dotenv==0.19.2
-python-dateutil~=2.8.2
-pymongo~=3.12.0
+discord==2.1.0
+termcolor==2.1.1
+python-dotenv==0.21.0
+python-dateutil==2.8.2
+pymongo==4.3.3
 parsedatetime~=2.6

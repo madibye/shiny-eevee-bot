@@ -4,6 +4,7 @@ from discord.ext.commands import Context
 
 from helpers import db
 
+
 class Threads(commands.Cog, name="Threads"):
     def __init__(self, bot):
         self.bot: commands.Bot = bot
@@ -11,14 +12,14 @@ class Threads(commands.Cog, name="Threads"):
     @commands.command(name="threadkeepalive", aliases=["tka"])
     async def thread_keep_alive(self, ctx: Context):
         if not isinstance(ctx.channel, Thread):
-            return await ctx.send("To keep a thread alive, use this command in a thread!")
+            return await ctx.send("to keep a thread alive, use this in a thread!")
         keep_alive_threads = db.get_keep_alive_threads()
         if ctx.channel.id not in keep_alive_threads:
             db.add_keep_alive_thread(ctx.channel.id)
-            return await ctx.send("Okie, I'll keep this thread alive for you! Use `!threadkeepalive` again in this "
+            return await ctx.send("okay, i'll keep this thread alive for you :)! use this again in this "
                                   "channel if you want me to stop reviving this thread!")
         db.remove_keep_alive_thread(ctx.channel.id)
-        return await ctx.send("Alright, I won't keep this thread alive anymore!")
+        return await ctx.send("okay, i won't keep this thread alive anymore... hope it's okay on its own :(")
 
     @commands.Cog.listener()
     async def on_thread_update(self, before: Thread, after: Thread):

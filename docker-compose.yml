@@ -7,8 +7,8 @@ services:
       - mongo_data:/data/db
     restart: always
 
-  princess_trixie:
-    container_name: "Princess-Trixie"
+  madi-the-koala:
+    container_name: "madi"
     build: .
     depends_on:
       - mongo

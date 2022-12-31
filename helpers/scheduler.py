@@ -1,26 +1,20 @@
 import re
 import time
 from datetime import datetime, timedelta
-from typing import Tuple, List, Union
-import json
+from enum import Enum
 
-import config
 from dateutil import tz
-from discord import Forbidden, Guild, ButtonStyle, Role, Member
+from discord import Forbidden, Guild, ButtonStyle, User, ForumChannel, TextChannel, CategoryChannel, Thread, DMChannel
 from discord.ext import tasks
 from discord.ext.commands.context import Context
 from discord.ui import Button
-from helpers import db
-from helpers.component_globals import ComponentBase
 from parsedatetime import Calendar
 from termcolor import cprint
 
-
-# Reminders
-class ReminderButtons(ComponentBase):
-    def __init__(self, url):
-        super().__init__(timeout=None)
-        self.add_link_button("Message", url)
+import config
+from helpers import db
+from helpers.component_globals import ComponentBase
+from main import MadiBot
 
 
 class SubError(Exception):
@@ -28,118 +22,225 @@ class SubError(Exception):
         self.message = message
 
 
-# Polls
-class ArchiveButton(Button):
-    def __init__(self, thread_id):
-        super().__init__(label="Archive", style=ButtonStyle.success, custom_id=f"archive {thread_id}")
+# Used for reminders, schedule announcements, poll DMs
+class SingleLinkButtonView(ComponentBase):
+    def __init__(self, label, url):
+        super().__init__()
+        self.add_link_button(label=label, url=url)
 
 
-class ArchiveButtonView(ComponentBase):
-    def __init__(self, thread_id):
-        super().__init__(timeout=None)
-        self.add_item(ArchiveButton(thread_id))
+# Used for repeating reminders
+class CancelRepeatingReminderView(ComponentBase):
+    def __init__(self, reminder_id: str = "", label: str = "Cancel Repeating Reminder", disabled: bool = False):
+        super().__init__()
+        self.add_item(Button(label=label, style=ButtonStyle.red, custom_id=f"CRR {reminder_id}", disabled=disabled))
 
 
-async def add_to_schedule(schedule_type: str, timestamp: int, target: int, channel: int, url: str = "", args=""):
-    """
-    :param schedule_type: String denoting what we're scheduling for ("reminder", "sub", "unsub", or "poll")
-    :param timestamp: Timestamp for when the reminder should go off
-               (use the get_timestamp function to help determine that, if you like!!!)
-    :param target: User id
-    :param channel: Channel id
-    :param url: URL to link to the original message that is associated with the scheduled
-    :param args: additional arguments that need to be stored in the reminder object can be stored here
-    """
-    db.add_reminder(
-        {
-            "type": schedule_type,
-            "timestamp": timestamp,
-            "target": target,
-            "channel": channel,
-            "url": url,
-            "note": args,
-        }
-    )
+class ScheduledEventType(Enum):
+    REMINDER = 0
+    SUB = 1
+    UNSUB = 2
+    REPEATING_REMINDER = 3
+
+
+# Put event types that require a valid target ID here.
+NEEDS_TARGET = [ScheduledEventType.REMINDER, ScheduledEventType.SUB, ScheduledEventType.UNSUB, ScheduledEventType.REPEATING_REMINDER]
+
+
+class ScheduledEvent:
+    def __init__(
+            self, bot: MadiBot, event_type: ScheduledEventType, timestamp: int, channel_id: int,
+            target_id: int = 0, url: str = "", raw_data: dict | None = None, extra_args=None
+    ):
+        """
+        This class handles everything related to scheduled events.
+
+        :param bot: We need to take in our bot object here. Usually, this will be self.bot if you're acting within a cog.
+        :param event_type: The type of event this is. A callback method will be determined depending on this value.
+                           If implementing a new event type, be sure to add its enum in the get_callback method.
+        :param timestamp: When our reminder will go off.
+        :param channel_id: The channel ID, usually that in which our event will occur.
+        :param target_id: (Optional) The user that's setting our event. Not necessary to set in all cases.
+        :param url: (Optional) A message URL for our event to take from.
+        :param raw_data: (Optional) The dict this event was loaded from if it's being loaded from the db.
+                         Don't worry about setting this 99% of the time.
+        :param extra_args: (Optional) Any extra information we need to pass our event.
+        """
+        self.bot: MadiBot = bot
+        self.event_type: ScheduledEventType = event_type
+        self.timestamp: int = timestamp
+        self.guild: Guild = self.bot.get_guild(config.guild_id)
+        self.target: User | None = self.bot.get_user(target_id) if target_id else None
+        self.channel: ForumChannel | TextChannel | CategoryChannel | Thread | DMChannel = self.bot.get_channel(
+            channel_id)
+        self.url: str = url
+        self.extra_args = extra_args
+        self.raw_data: dict = raw_data if raw_data else self.__dict__()
+        if "_id" in self.raw_data:
+            self.raw_data.pop("_id")  # Just in case, we don't need the object ID
+        self.callback = self.get_callback()
+
+    def get_callback(self):
+        return {
+            ScheduledEventType.REMINDER: self.send_reminder,
+            ScheduledEventType.SUB: self.handle_sub,
+            ScheduledEventType.UNSUB: self.handle_sub,
+            ScheduledEventType.REPEATING_REMINDER: self.send_repeating_reminder,
+        }.get(self.event_type)
+
+    def __dict__(self):
+        return {"event_type": self.event_type.value, "timestamp": self.timestamp,
+                "target_id": getattr(self.target, "id", 0),
+                "channel_id": self.channel.id, "url": self.url, "extra_args": self.extra_args}
+
+    def add_to_db(self):
+        return db.add_reminder(self.raw_data)
+
+    def remove_from_db(self):
+        return db.delete_reminder(self.raw_data)
+
+    async def send_reminder(self):
+        if self.extra_args:
+            note = f"I'm reminding you {(self.extra_args + '!') if (self.extra_args.split(' ')[0] in ['to', 'about']) else ('about this message: ' + self.extra_args)}"[
+                   0:1970]
+        else:
+            msg = await self.channel.fetch_message(int(self.url.split("/")[6]))
+            split_msg_content = msg.content.split(" ")
+            if len(split_msg_content) > 3:
+                note = f"I'm reminding you about this message: {' '.join(split_msg_content[3:])}"[0:1970]
+            else:
+                note = "I'm reminding you about this message!"
+        # if the URL is empty, this means it's a slash command; therefore, we should DM the user
+        if self.url == "":
+            try:
+                await self.target.send(f"Hey there, {note}")
+            except Forbidden:
+                pass  # i.e. if the user's DM channel can't be opened due to having server DMs off or having the bot blocked
+        else:
+            await self.channel.send(content=f"Hey <@{self.target.id}>! {note}",
+                                    view=SingleLinkButtonView("Message", self.url))
+
+    async def send_repeating_reminder(self):
+        self.extra_args: dict[str, str | int]
+        note = self.extra_args.get("note")
+        repeat_delta = self.extra_args.get("repeat")
+        prev_id = self.extra_args.get("prev_id")
+        if prev_id:
+            prev_msg = await self.target.dm_channel.fetch_message(prev_id)
+            if prev_msg:
+                await prev_msg.edit(view=None)
+        edited_note = f"I'm reminding you {(note + '!') if (note.split(' ')[0] in ['to', 'about']) else ('about this message: ' + note)}"[
+                      0:1970]
+        try:
+            msg = await self.target.send(f"Hey there, {edited_note}", view=CancelRepeatingReminderView(disabled=True))
+            reminder = ScheduledEvent(bot=self.bot, event_type=ScheduledEventType.REPEATING_REMINDER,
+                                      target_id=self.target.id,
+                                      timestamp=round((datetime.now(tz=tz.gettz("America/New_York")) + timedelta(
+                                          seconds=repeat_delta)).timestamp()),
+                                      channel_id=self.channel.id,
+                                      extra_args={'note': note, 'repeat': repeat_delta, 'prev_id': msg.id})
+            reminder_id = reminder.add_to_db()
+            await msg.edit(view=CancelRepeatingReminderView(reminder_id))
+        except Forbidden:
+            pass  # i.e. if the user's DM channel can't be opened due to having server DMs off or having the bot blocked
+
+    async def handle_sub(self):
+        try:
+            sub_msg = await sub(self.channel, self.bot, self.target.id, self.event_type == ScheduledEventType.UNSUB)
+            if "silent" not in str(self.extra_args):
+                await self.channel.send(sub_msg)
+        except SubError:
+            pass
+
 
 @tasks.loop(seconds=15)
-async def schedule_loop(bot):
+async def schedule_loop(bot: MadiBot):
     current_ts = time.time()
-    r_list = db.get_all_reminders()
-    for reminder in r_list:
-        if reminder["timestamp"] <= current_ts:
-            try:
-                channel = bot.get_channel(reminder["channel"])
-            except AttributeError:
-                cprint(f"Tried to send a reminder in a non-existent channel, here's the reminder dict:\n{reminder}", "red")
-                return db.delete_reminder(reminder)
-            r_type = reminder.get("type")
-            if r_type == "reminder" or not r_type:
-                await send_reminder(reminder, bot, channel)
-            db.delete_reminder(reminder)
+    for reminder in [reminder_from_dict(bot, r) for r in db.get_all_reminders() if r.get("timestamp", 0) <= current_ts]:
+        if not reminder.channel or not reminder.callback or not reminder.timestamp or (
+                reminder.event_type in NEEDS_TARGET and not reminder.target):
+            cprint(f"Oopsie, something went wrong with a reminder, here's the reminder dict:\n{reminder.raw_data}",
+                   "red")
+            reminder.remove_from_db()
+            continue
+        await reminder.callback()
+        reminder.remove_from_db()
 
-async def scheduler_add(ctx: Context, args, unsub=False) -> str:
+
+def reminder_from_dict(bot: MadiBot, data: dict) -> ScheduledEvent:
+    try:
+        event_type = ScheduledEventType(data.get("event_type", data.get("type")))
+    except ValueError:
+        event_type = {None: ScheduledEventType.REMINDER, "reminder": ScheduledEventType.REMINDER,
+                      "sub": ScheduledEventType.SUB, "unsub": ScheduledEventType.UNSUB}.get(data.get("event_type", data.get("type")))
+    return ScheduledEvent(bot=bot, event_type=event_type, timestamp=data.get("timestamp", 0),
+                          target_id=data.get("target_id", data.get("target", 0)),
+                          channel_id=data.get("channel_id", data.get("channel", 0)),
+                          url=data.get("url", ""), raw_data=data, extra_args=data.get("extra_args", data.get("note")))
+
+
+async def scheduler_add(bot: MadiBot, ctx: Context, args, unsub=False) -> str:
     schedule_str = ""
     current_time = datetime.now(tz=tz.gettz("America/New_York"))
     total_delta = process_time_strings(current_time, list(args), False)
     new_time = current_time + total_delta
     if new_time != current_time:
-        schedule_str = f" You will be {'un' if unsub else 're-'}subscribed at {new_time.strftime('%l:%M %p on %b %d, %Y')}.".replace('  ', ' ')
-        await add_to_schedule(
-            "unsub" if unsub else "sub",
-            int(new_time.timestamp()),
-            ctx.author.id,
-            ctx.channel.id,
-            ctx.message.jump_url,
-            ""
-        )
+        schedule_str = f" You will be {'un' if unsub else 're-'}subscribed at {new_time.strftime('%l:%M %p on %b %d, %Y')}.".replace(
+            '  ', ' ')
+        reminder = ScheduledEvent(bot=bot, event_type=ScheduledEventType.UNSUB if unsub else ScheduledEventType.SUB,
+                                  timestamp=int(new_time.timestamp()),
+                                  target_id=ctx.author.id, channel_id=ctx.channel.id, url=ctx.message.jump_url)
+        reminder.add_to_db()
     return schedule_str
 
-async def send_reminder(rem, bot, channel):
-    if "note" in rem:
-        if rem["note"]:
-            note = f"I'm reminding you {(rem['note'] + '!') if (rem['note'].split(' ')[0] in ['to', 'about']) else ('about this message: ' + rem['note'])}"
-        else:
-            note = "I'm reminding you about this message!"
-    else:
-        msg = await channel.fetch_message(rem["url"].split("/")[6])
-        note_array = msg.content.split(" ")[3:]
-        note = f"I'm reminding you about this message{(': ' + ' '.join(note_array)) if note_array else '!'}"
-    if len(note) >= 1970:
-        note = note[0:1970]
-    # if the URL is empty, this means it's a slash command; therefore, we should DM the user
-    if rem["url"] == "":
-        try:
-            user = bot.get_user(rem['target'])
-            await user.send(f"Hey there, {note}")
-        except Forbidden:
-            pass  # i.e. if the user's DM channel can't be opened due to having server DMs off or having the bot blocked
-    else:
-        await channel.send(
-            content=f"Hey <@{rem['target']}>! {note}",
-            view=ReminderButtons(rem["url"])
-        )
 
-async def send_shift_announcement(note, channel, url, redis):
-    announcement_msg = await channel.send(note)
-    await redis.lpush("posted-sa", json.dumps({
-        "msg_id": int(url.split('/')[-1]),
-        "url": announcement_msg.jump_url,
-    }))
+def info_from_channel(channel):
+    return {
+        config.ccgse_channel: (channel.guild.get_role(config.ccgse_notif_role), "the Crazy Card Game Showdown Experience"),
+        config.minecraft_channel: (channel.guild.get_role(config.minecraft_notif_role), "Minecraft"),
+        config.club_channel: (channel.guild.get_role(config.club_notif_role), "the Koala City club"),
+    }.get(channel.id, (None, None))
 
-async def sub(target: Member, notif_role: Role, msg_end: str, unsub: bool = False) -> str:
+
+async def sub(channel: TextChannel | Thread, bot: MadiBot, target_id: int, unsub: bool = False, ping: bool = True) -> str:
+    guild = bot.get_guild(config.guild_id)
+    target = await guild.fetch_member(target_id)
+    notif_role, msg_end = info_from_channel(channel)
+    if not notif_role:
+        raise SubError(
+            message=f"Oh no, looks like something went wrong... Please contact Madi, I'm sure she'll fix it.")
     if unsub and notif_role in target.roles:
+        clean_sub_tasks(ScheduledEventType.UNSUB, target_id, channel.id)
         await target.remove_roles(notif_role)
-        return f"You have been unsubscribed from notifications for {msg_end}."
+        return f"{f'<@{target.id}> ' if ping else ''}You have been unsubscribed from notifications for {msg_end}."
     elif not unsub and notif_role not in target.roles:
+        clean_sub_tasks(ScheduledEventType.SUB, target_id, channel.id)
         await target.add_roles(notif_role)
-        return f"You have been subscribed to notifications for {msg_end}."
+        return f"{f'<@{target.id}> ' if ping else ''}You have been subscribed to notifications for {msg_end}."
     else:
-        return f"You {'are not currently' if unsub else 'are already'} subscribed to notifications for {msg_end}!"
+        raise SubError(
+            message=f"{f'<@{target.id}> ' if ping else ''}You {'are not currently' if unsub else 'are already'} "
+                    f"subscribed to notifications for {msg_end}!")
+
+
+def clean_sub_tasks(event_type: ScheduledEventType, target_id: int, channel_id: int):
+    def check_reminder_dict(data: dict):
+        # This is probably way less scary than it looks.
+        return (data.get("target_id", data.get("target", 0)) == target_id
+                and data.get("channel_id", data.get("channel", 0)) == channel_id
+                and data.get("timestamp") > time.time() and (
+                    data.get("event_type", data.get("type")) in [ScheduledEventType.SUB, "sub"]
+                    if event_type == ScheduledEventType.SUB else [ScheduledEventType.UNSUB, "unsub"]))
+
+    for raw_reminder in [r for r in db.get_all_reminders() if check_reminder_dict(r)]:
+        db.delete_reminder(raw_reminder)
+
 
 def remove_empty_items(items: list):
     for _ in range(items.count("")):
         items.remove("")
     return items
+
 
 async def replace_tags_with_mentions(note: str, guild: Guild) -> str:
     for role in guild.roles:
@@ -154,17 +255,20 @@ async def replace_tags_with_mentions(note: str, guild: Guild) -> str:
         )
     return note
 
+
 def make_time_delta(dt: datetime, now: datetime) -> timedelta:
     """takes a datetime object and represents it in a time delta"""
     return dt - now
 
-def process_note(nstrings: List[str], i: int) -> List[str]:
+
+def process_note(nstrings: list[str], i: int) -> list[str]:
+    words_to_remove = ["in", "and", "on", "at", "@"]
     # if we find that the previous index slot is a number, and the one before that is a keyword like "in",
-    if i > 1 and (nstrings[i - 1].isnumeric() and nstrings[i - 2].lower() in config.remindme_remove_words):
+    if i > 1 and (nstrings[i - 1].isnumeric() and nstrings[i - 2].lower() in words_to_remove):
         # we'll remove the last three words from the note
         nstrings[i - 2:i + 1] = '', '', ''
     # if the previous index slot is one or the other between a number or one of our keywords,
-    elif i > 0 and (nstrings[i - 1].isnumeric() or nstrings[i - 1].lower() in config.remindme_remove_words):
+    elif i > 0 and (nstrings[i - 1].isnumeric() or nstrings[i - 1].lower() in words_to_remove):
         # we'll just remove the last two words
         nstrings[i - 1:i + 1] = '', ''
     # otherwise, we already know the current index slot we're on needs to be removed
@@ -176,12 +280,15 @@ def process_note(nstrings: List[str], i: int) -> List[str]:
         nstrings[i + 1] = ''
     return nstrings
 
-def process_time_strings(now: datetime, tstrings: List[str], return_note: bool = False) -> Union[Tuple[timedelta, str], timedelta]:
+
+def process_time_strings(now: datetime, tstrings: list[str], return_note: bool = False) -> tuple[
+                                                                                               timedelta, str] | timedelta:
     """
     processes a list of strings/arguments, adds up all recognizable times in them, and returns a timedelta object.
     if return_note is true, we'll also return a string with the times parsed out.
     """
     a = Calendar()
+    nstrings = ""
 
     # words_to_remove and nstrings are only referenced behind if return_note statements, so we don't need to worry about referencing them before assignment
     if return_note:
@@ -210,7 +317,8 @@ def process_time_strings(now: datetime, tstrings: List[str], return_note: bool =
     for i in range(len(exp_tstrs)):
         # build our string we're attempting to parse
         time_string = exp_tstrs[i]
-        dt, parse_status = a.parseDT(datetimeString=time_string, sourceTime=now, tzinfo=tz.gettz("America/New_York"))
+        dt, parse_status = a.parseDT(datetimeString=time_string, sourceTime=now,
+                                     tzinfo=tz.gettz("America/New_York"))
 
         # if what we have is parsable..
         if parse_status:
@@ -230,44 +338,9 @@ def process_time_strings(now: datetime, tstrings: List[str], return_note: bool =
                 if return_note:
                     # and we can start removing now-irrelevant parts of the original string itself
                     nstrings = process_note(nstrings, i)
-            elif return_note:
+            else:
                 update_time = False
 
     # return the best parse we could find,
     # along with a string of everything other than that parse.
     return (best_delta, ' '.join(remove_empty_items(nstrings))) if return_note else best_delta
-
-async def get_timestamp(ctx, args):
-    current_time = datetime.now()
-    try:
-        if int(args[0]) < 1:
-            await ctx.send("Please specify a time greater than 0")
-            return 0
-        else:
-            amount = args[0]
-            unit = args[1]
-    except (ValueError or KeyError):
-        await ctx.send("Please specify time as a number.")
-        return 0
-
-    # Calculate the time
-    if unit in ["second", "sec", "seconds", "s"]:
-        current_time += timedelta(seconds=int(amount))
-    elif unit in ["min", "mins", "minutes", "minute", "m"]:
-        current_time += timedelta(minutes=int(amount))
-    elif unit in ["hr", "hrs", "hours", "hour", "h"]:
-        current_time += timedelta(hours=int(amount))
-    elif unit in ["day", "days", "d"]:
-        current_time += timedelta(days=int(amount))
-    elif unit in ["week", "weeks", "w"]:
-        current_time += timedelta(weeks=int(amount))
-    elif unit in ["month", "months", "mo"]:
-        current_time += timedelta(days=int(amount) * 30)
-    elif unit in ["year", "years", "y"]:
-        current_time += timedelta(days=int(amount) * 365)
-    else:
-        await ctx.send(
-            "Please specify a time unit: second/minute/hour/day/week/month/year"
-        )
-        return 0
-    return current_time

@@ -9,7 +9,7 @@ import config
 intents = Intents.all()
 
 
-class PrincessTrixie(Bot):
+class MadiBot(Bot):
     def __init__(self):
         super().__init__(command_prefix=["!"], help_command=None, application_id=config.bot_application_id, intents=intents)
 
@@ -33,5 +33,5 @@ class PrincessTrixie(Bot):
 
 
 if __name__ == "__main__":
-    bot = PrincessTrixie()
+    bot = MadiBot()
     bot.run(config.discord_token)

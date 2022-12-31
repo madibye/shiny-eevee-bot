@@ -1,9 +1,12 @@
+from typing import List, Dict
+
 from discord import Object, Embed
 from discord.ext.commands import Context, Cog, command
+
+import config
 from helpers import command_helpers
 from helpers.type_matchups import type_list, PType
-from typing import List, Dict
-import config
+
 
 class Type(Cog, name="Type"):
     def __init__(self, bot):

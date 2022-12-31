@@ -1,15 +1,18 @@
 from typing import Optional
+
 from discord import Guild, app_commands, Object
 from discord.ext import commands
 
 import config
-from helpers.component_globals import *
 from helpers import db
+from helpers.component_globals import *
+from main import MadiBot
+
 
 class Roles(commands.Cog, name="roles"):
     def __init__(self, bot):
-        self.bot = bot
-        self.guild: Guild = None
+        self.bot: MadiBot = bot
+        self.guild: Guild | None = None
 
     @commands.Cog.listener()
     async def on_ready(self):

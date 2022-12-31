@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Union, List
+from typing import List
 
 from discord import Interaction, Message, TextStyle
 from discord.ext.commands import Context

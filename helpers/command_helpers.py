@@ -1,6 +1,9 @@
 from typing import List
-import config
+
 from discord.ext.commands import Context
+
+import config
+
 
 def parse_args(ctx: Context) -> List[str]:
     args = ctx.message.content
