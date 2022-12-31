@@ -50,7 +50,7 @@ class RolePicker(commands.Cog, name="role_picker"):
     @commands.command(name="viewrolepickers", aliases=["viewrolepickerinfo", "vrpi", "vrp"])
     async def view_role_picker_info(self, ctx: Context):
         info_embeds = []
-        role_picker_list = await db.get_role_picker_db()
+        role_picker_list = db.get_role_picker_db()
         for key, role_picker_info in role_picker_list.items():
             embed = Embed(title=role_picker_info.embed_name, description=role_picker_info.embed_desc)
             embed.add_field(name="ID:", value=key)
@@ -70,12 +70,12 @@ class RolePicker(commands.Cog, name="role_picker"):
     @commands.has_role(991519471686668358)
     @commands.command(name="addrolepicker", aliases=["arp"])
     async def add_role_picker(self, ctx: Context, key: str):
-        role_picker_list = await db.get_role_picker_db()
+        role_picker_list = db.get_role_picker_db()
         if key in role_picker_list:
             return await ctx.send(
                 f"a role picker with the ID of {key} already exists, i can't replace it :(", reference=ctx.message)
         role_picker_list[key] = RolePickerInfo(channel_id=ctx.channel.id)
-        await db.set_role_picker_db(role_picker_list)
+        db.set_role_picker_db(role_picker_list)
         return await ctx.send(
             f"okay, i made a new role picker with the ID of {key} in this channel. "
             f"use `!editrolepicker` to set its properties before `!refresh`ing it into existence, pleeeease :)",
@@ -84,18 +84,18 @@ class RolePicker(commands.Cog, name="role_picker"):
     @commands.has_role(991519471686668358)
     @commands.command(name="removerolepicker", aliases=["killrolepicker", "krp", "rrp"])
     async def remove_role_picker(self, ctx: Context, key: str):
-        role_picker_list = await db.get_role_picker_db()
+        role_picker_list = db.get_role_picker_db()
         if key not in role_picker_list:
             return await ctx.send(f"i can't find a role picker with the ID of {key} :(", reference=ctx.message)
         await self.delete_role_picker(role_picker_list[key])  # Delete the current message for this role picker to avoid confusion later
         role_picker_list.pop(key)  # And kill the role picker from the DB
-        await db.set_role_picker_db(role_picker_list)
+        db.set_role_picker_db(role_picker_list)
         return await ctx.send(f"okay, i deleted the role picker with the ID of {key}... sad to see it go :(", reference=ctx.message)
 
     @commands.has_role(991519471686668358)
     @commands.command(name="editrolepicker", aliases=["editrp", "erp"])
     async def edit_role_picker(self, ctx: Context, key: str, value: str, *, args: str):
-        role_picker_list = await db.get_role_picker_db()
+        role_picker_list = db.get_role_picker_db()
         if key not in role_picker_list:
             return await ctx.send(f"i can't find a role picker with the ID of {key} :(", reference=ctx.message)
 
@@ -106,7 +106,7 @@ class RolePicker(commands.Cog, name="role_picker"):
             if int(args) not in [channel.id for channel in self.guild.channels]:
                 return await ctx.send(f"Couldn't change to channel {args}: This channel ID isn't a channel in this server!", reference=ctx.message)
             role_picker_list[key].channel_id = int(args)
-            await db.set_role_picker_db(role_picker_list)
+            db.set_role_picker_db(role_picker_list)
             return await ctx.send(f"I've set the channel for role picker **{key}** to <#{args}>!", reference=ctx.message)
 
         # Role IDs
@@ -142,7 +142,7 @@ class RolePicker(commands.Cog, name="role_picker"):
                     updated = True
             if not updated:
                 return
-            await db.set_role_picker_db(role_picker_list)
+            db.set_role_picker_db(role_picker_list)
             return await ctx.send(f"I've finished updating the role IDs! Use `!viewrolepickers` to check and make sure "
                                   f"everything looks right before refreshing!", reference=ctx.message)
 
@@ -151,7 +151,7 @@ class RolePicker(commands.Cog, name="role_picker"):
             if len(args) > 250:
                 return await ctx.send(f"Couldn't edit embed title: This embed title is too long! Please keep it below 250 characters.")
             role_picker_list[key].embed_name = args
-            await db.set_role_picker_db(role_picker_list)
+            db.set_role_picker_db(role_picker_list)
             return await ctx.send(f"I've set the embed title for role picker **{key}** to:\n\n**{args}**", reference=ctx.message)
 
         # Embed description
@@ -159,7 +159,7 @@ class RolePicker(commands.Cog, name="role_picker"):
             if len(args) > 2000:
                 return await ctx.send(f"Couldn't edit embed title: This embed title is too long! Please keep it below 2000 characters.", reference=ctx.message)
             role_picker_list[key].embed_desc = args
-            await db.set_role_picker_db(role_picker_list)
+            db.set_role_picker_db(role_picker_list)
             return await ctx.send(f"I've set the embed description for role picker **{key}** to:\n\n{args}", reference=ctx.message)
 
         # Max row length
@@ -171,7 +171,7 @@ class RolePicker(commands.Cog, name="role_picker"):
             if len(role_picker_list[key].role_ids) > (5 * int(args)):
                 return await ctx.send(f"Couldn't edit max row length: You have too many roles, the role picker would be unable to send with this max row length.")
             role_picker_list[key].max_row_length = int(args)
-            await db.set_role_picker_db(role_picker_list)
+            db.set_role_picker_db(role_picker_list)
             return await ctx.send(f"I've set the max row length for role picker **{key}** to **{args}**!", reference=ctx.message)
 
         else:
@@ -185,7 +185,7 @@ class RolePicker(commands.Cog, name="role_picker"):
         :param args: List all IDs of role pickers you want to refresh
         :return: Whether or not any role pickers were refreshed via this method
         """
-        role_picker_list = await db.get_role_picker_db()
+        role_picker_list = db.get_role_picker_db()
         refreshed = False  # How we'll keep track of whether or not we've done anything here
 
         # Now let's repost new ones for the session
@@ -194,10 +194,10 @@ class RolePicker(commands.Cog, name="role_picker"):
                 continue
             # First we delete the old message
             await self.delete_role_picker(role_picker)
-            await db.remove_role_picker_msg(key)
+            db.remove_role_picker_msg(key)
             # Now we can repost!!!
             msg = await self.post_role_picker(role_picker)
-            await db.add_role_picker_msg(key, msg.channel.id, msg.id)
+            db.add_role_picker_msg(key, msg.channel.id, msg.id)
             refreshed = True
 
         return refreshed
