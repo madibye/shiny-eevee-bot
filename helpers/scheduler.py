@@ -4,7 +4,8 @@ from datetime import datetime, timedelta
 from enum import Enum
 
 from dateutil import tz
-from discord import Forbidden, Guild, ButtonStyle, User, ForumChannel, TextChannel, CategoryChannel, Thread, DMChannel
+from discord import Guild, ButtonStyle, User, ForumChannel, TextChannel, CategoryChannel, Thread, DMChannel
+from discord.errors import Forbidden, HTTPException, NotFound
 from discord.ext import tasks
 from discord.ext.commands.context import Context
 from discord.ui import Button
@@ -30,8 +31,8 @@ class SingleLinkButtonView(ComponentBase):
 
 
 # Used for repeating reminders
-class CancelRepeatingReminderView(ComponentBase):
-    def __init__(self, reminder_id: str = "", label: str = "Cancel Repeating Reminder", disabled: bool = False):
+class CancelReminderView(ComponentBase):
+    def __init__(self, reminder_id: str = "", label: str = "Stop Reminding", disabled: bool = False):
         super().__init__()
         self.add_item(Button(label=label, style=ButtonStyle.red, custom_id=f"CRR {reminder_id}", disabled=disabled))
 
@@ -100,47 +101,49 @@ class ScheduledEvent:
         return db.delete_reminder(self.raw_data)
 
     async def send_reminder(self):
-        if self.extra_args:
-            note = f"I'm reminding you {(self.extra_args + '!') if (self.extra_args.split(' ')[0] in ['to', 'about']) else ('about this message: ' + self.extra_args)}"[
-                   0:1970]
+        if isinstance(self.extra_args, dict):
+            note = self.extra_args.get("note")
+            prev_id = self.extra_args.get("prev_id", 0)
         else:
-            msg = await self.channel.fetch_message(int(self.url.split("/")[6]))
-            split_msg_content = msg.content.split(" ")
-            if len(split_msg_content) > 3:
-                note = f"I'm reminding you about this message: {' '.join(split_msg_content[3:])}"[0:1970]
-            else:
-                note = "I'm reminding you about this message!"
+            note = self.extra_args
+            prev_id = 0
+        edited_note = f"I'm reminding you {(note + '!') if (note.split(' ')[0] in ['to', 'about']) else ('about this message: ' + note)}"[0:1970] \
+            if note else "I'm reminding you about this message!"
+        try:
+            prev_msg = await self.channel.fetch_message(prev_id)
+            await prev_msg.delete()
+        except (Forbidden, HTTPException, NotFound):
+            try:  # Nested try excepts!!!!!! Yay
+                prev_msg = await self.channel.fetch_message(prev_id)
+                await prev_msg.delete()
+            except (Forbidden, HTTPException, NotFound):
+                pass
         # if the URL is empty, this means it's a slash command; therefore, we should DM the user
         if self.url == "":
             try:
-                await self.target.send(f"Hey there, {note}")
+                await self.target.send(f"Hey there, {edited_note}")
             except Forbidden:
                 pass  # i.e. if the user's DM channel can't be opened due to having server DMs off or having the bot blocked
         else:
-            await self.channel.send(content=f"Hey <@{self.target.id}>! {note}",
-                                    view=SingleLinkButtonView("Message", self.url))
+            await self.channel.send(content=f"Hey <@{self.target.id}>! {edited_note}", view=SingleLinkButtonView("Message", self.url))
 
     async def send_repeating_reminder(self):
-        self.extra_args: dict[str, str | int]
         note = self.extra_args.get("note")
         repeat_delta = self.extra_args.get("repeat")
         prev_id = self.extra_args.get("prev_id")
-        if prev_id:
-            prev_msg = await self.target.dm_channel.fetch_message(prev_id)
-            if prev_msg:
-                await prev_msg.edit(view=None)
-        edited_note = f"I'm reminding you {(note + '!') if (note.split(' ')[0] in ['to', 'about']) else ('about this message: ' + note)}"[
-                      0:1970]
         try:
-            msg = await self.target.send(f"Hey there, {edited_note}", view=CancelRepeatingReminderView(disabled=True))
-            reminder = ScheduledEvent(bot=self.bot, event_type=ScheduledEventType.REPEATING_REMINDER,
-                                      target_id=self.target.id,
-                                      timestamp=round((datetime.now(tz=tz.gettz("America/New_York")) + timedelta(
-                                          seconds=repeat_delta)).timestamp()),
-                                      channel_id=self.channel.id,
-                                      extra_args={'note': note, 'repeat': repeat_delta, 'prev_id': msg.id})
+            prev_msg = await self.channel.fetch_message(prev_id)
+            await prev_msg.delete()
+        except (Forbidden, HTTPException, NotFound):
+            pass
+        edited_note = f"I'm reminding you {(note + '!') if (note.split(' ')[0] in ['to', 'about']) else ('about this message: ' + note)}"[0:1970]
+        try:
+            msg = await self.target.send(f"Hey there, {edited_note}", view=CancelReminderView(disabled=True))
+            reminder = ScheduledEvent(bot=self.bot, event_type=ScheduledEventType.REPEATING_REMINDER, target_id=self.target.id,
+                                      timestamp=round((datetime.now(tz=tz.gettz("America/New_York")) + timedelta(seconds=repeat_delta)).timestamp()),
+                                      channel_id=self.channel.id, extra_args={'note': note, 'repeat': repeat_delta, 'prev_id': msg.id})
             reminder_id = reminder.add_to_db()
-            await msg.edit(view=CancelRepeatingReminderView(reminder_id))
+            await msg.edit(view=CancelReminderView(reminder_id))
         except Forbidden:
             pass  # i.e. if the user's DM channel can't be opened due to having server DMs off or having the bot blocked
 
