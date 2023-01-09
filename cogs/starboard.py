@@ -41,8 +41,9 @@ class Starboard(commands.Cog, name="Starboard"):
         if payload.emoji.name != "⭐":
             return
         try:
-            channel: TextChannel | Thread = await self.guild.fetch_channel(payload.channel_id)
-            if (getattr(channel, "id", 0) not in config.starboard_allowed_channels) and (
+            channel: Thread = await self.guild.fetch_channel(payload.channel_id)
+            if (getattr(channel, "id", 0) not in config.starboard_allowed_channels or
+                getattr(channel, "parent_id", 0) not in config.starboard_allowed_channels) and (
                 getattr(channel, "category_id", 0) not in config.starboard_allowed_channels
             ):
                 return
