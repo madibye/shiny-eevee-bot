@@ -1,5 +1,5 @@
 from discord import Guild, TextChannel, RawReactionActionEvent, utils, Message, File, Interaction, Embed, Colour, Thread
-from discord.errors import NotFound, Forbidden, HTTPException
+from discord.errors import NotFound, Forbidden, HTTPException, InvalidData
 from discord.ext import commands
 
 import config
@@ -42,12 +42,14 @@ class Starboard(commands.Cog, name="Starboard"):
             return
         try:
             channel: TextChannel | Thread = await self.guild.fetch_channel(payload.channel_id)
+            if (getattr(channel, "id", 0) not in config.starboard_allowed_channels) and (
+                getattr(channel, "category_id", 0) not in config.starboard_allowed_channels
+            ):
+                print("channel not allowed, returning")
+                return
             msg: Message = await channel.fetch_message(payload.message_id)
-            if not channel or not msg:
-                return
-            if (channel.id not in config.starboard_allowed_channels) and (channel.category_id not in config.starboard_allowed_channels):
-                return
-        except (NotFound, Forbidden, HTTPException):
+        except (NotFound, Forbidden, HTTPException, InvalidData):
+            print("channel/msg not found, returning")
             return
         for reaction in msg.reactions:
             if reaction.emoji == '⭐' and hasattr(reaction, "count"):
