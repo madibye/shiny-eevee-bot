@@ -38,8 +38,6 @@ class Starboard(commands.Cog, name="Starboard"):
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload: RawReactionActionEvent):
-        if not payload.emoji.name != '⭐':
-            return
         try:
             channel: TextChannel | Thread = await self.guild.fetch_channel(payload.channel_id)
             msg: Message = await channel.fetch_message(payload.message_id)
