@@ -38,9 +38,13 @@ ccgse_notif_role = 996963548959871069
 minecraft_notif_role = 1007714356189991083
 club_notif_role = 1007714385642393655
 
+# Channels
 ccgse_channel = 993962449717960836
 minecraft_channel = 1009699321651925022
 club_channel = 991544912556339241
+starboard_channel = 997571188727492749
+starboard_allowed_channels = [991523087348662373, 991544337747951617, 991518171729231924]
+starboard_required_reactions = 1
 
 remindme_ignore_words = ["this"]
 remindme_remove_words = ["in", "and", "on", "at", "@"]

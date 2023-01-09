@@ -21,11 +21,11 @@ class Roles(commands.Cog, name="roles"):
     @app_commands.command(name="customrole", description="set your own custom role color with this nice little slash command :)")
     @app_commands.describe(color="the hex color for your role. you can leave out the # if you like. set to 0 to clear color!",
                            name="the name for your role. leave it blank if you don't wanna change it!")
-    async def custom_role(self, interaction: Interaction, color: Optional[str], name: Optional[str]):
+    async def custom_role(self, interaction: Interaction, color: str | None = None, name: str | None = None):
         if not name and not color:
             return await interaction.response.send_message(f"oh okay... but nothing changed :(", ephemeral=True)
         custom_roles_db = db.get_custom_roles()
-        if str(interaction.user.id) not in custom_roles_db or not custom_roles_db.get(str(interaction.user.id)):
+        if not custom_roles_db.get(str(interaction.user.id)):
             if not name:
                 name = interaction.user.display_name
             role = await self.guild.create_role(name=name)

@@ -10,6 +10,7 @@ db_reminders: Collection = database.reminders  # Mongo Collection
 db_threads: Collection = database.thread
 db_roles: Collection = database.roles
 db_role_pickers: Collection = database.role_pickers
+db_starboard: Collection = database.starboard
 
 
 def add_reminder(data):
@@ -86,7 +87,6 @@ def create_role_picker_db():
             role_pickers.append(document)
     return role_pickers
 
-
 def get_role_picker_db():
     """
     :return: A dict of all documents in the db converted into RolePickerInfo objects.
@@ -102,7 +102,6 @@ def get_role_picker_db():
             channel_id=role_picker_info['channel_id'], embed_name=role_picker_info['embed_name'], embed_desc=role_picker_info['embed_desc'],
             role_ids=role_picker_info['role_ids'], max_row_length=role_picker_info['max_row_length'], message_data=role_picker_info['message_data'])
     return role_pickers
-
 
 def set_role_picker_db(role_pickers: dict):
     """
@@ -124,11 +123,9 @@ def set_role_picker_db(role_pickers: dict):
         else:  # Or inserting new ones
             db_role_pickers.insert_one(document)
 
-
 def get_role_picker_ids():
     role_picker_db = list(db_role_pickers.find({}))
     return [role_picker_info['_id'] for role_picker_info in role_picker_db]
-
 
 def add_role_picker_msg(key: str, channel: int, message: int):
     """
@@ -140,7 +137,6 @@ def add_role_picker_msg(key: str, channel: int, message: int):
     document["message_data"] = {'channel_id': channel, 'message_id': message}
     db_role_pickers.replace_one({"_id": key}, document)
 
-
 def remove_role_picker_msg(key: str):
     """
     :param key: The key or ID of the role picker object you're editing
@@ -148,3 +144,13 @@ def remove_role_picker_msg(key: str):
     document = db_role_pickers.find_one({"_id": key})
     document["message_data"] = {'channel_id': 0, 'message_id': 0}
     db_role_pickers.replace_one({"_id": key}, document)
+
+def create_starboard_db():
+    document = {"_id": "starboard_messages", "message_ids": [], "starboard_msg_ids": []}
+    db_starboard.insert_one(document)
+
+def get_starboard_db():
+    return db_starboard.find_one({"_id": "starboard_messages"})
+
+def update_starboard_db(list_to_edit, new_ids):
+    return db_starboard.update_one({"_id": "starboard_messages"}, {"$set": {list_to_edit: new_ids}})
