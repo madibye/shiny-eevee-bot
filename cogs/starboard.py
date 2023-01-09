@@ -38,17 +38,16 @@ class Starboard(commands.Cog, name="Starboard"):
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload: RawReactionActionEvent):
+        if not payload.emoji.name != '⭐':
+            return
         try:
             channel: TextChannel | Thread = await self.guild.fetch_channel(payload.channel_id)
             msg: Message = await channel.fetch_message(payload.message_id)
             if not channel or not msg:
-                print("no channel/msg")
                 return
             if (channel.id not in config.starboard_allowed_channels) and (channel.category_id not in config.starboard_allowed_channels):
-                print("channel id not allowed")
                 return
         except (NotFound, Forbidden, HTTPException):
-            print("no channel/msg found")
             return
         for reaction in msg.reactions:
             if reaction.emoji == '⭐' and hasattr(reaction, "count"):

@@ -58,6 +58,7 @@ discord_cogs = [
     "cogs.roles",
     "cogs.notifications",
     "cogs.role_picker",
+    "cogs.starboard",
 ]
 
 default_role_picker_info = {}
