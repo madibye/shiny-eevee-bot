@@ -160,10 +160,15 @@ class ScheduledEvent:
 async def schedule_loop(bot: Madi):
     current_ts = time.time()
     for reminder in [reminder_from_dict(bot, r) for r in db.get_all_reminders() if r.get("timestamp", 0) <= current_ts]:
+        if (not reminder.channel) and reminder.target and reminder.event_type in [
+                ScheduledEventType.REMINDER, ScheduledEventType.REPEATING_REMINDER]:
+            try:
+                reminder.channel = await reminder.target.create_dm()
+            except (Forbidden, NotFound):
+                pass
         if not reminder.channel or not reminder.callback or not reminder.timestamp or (
                 reminder.event_type in NEEDS_TARGET and not reminder.target):
-            cprint(f"Oopsie, something went wrong with a reminder, here's the reminder dict:\n{reminder.raw_data}",
-                   "red")
+            cprint(f"Oopsie, something went wrong with a reminder, here's the reminder dict:\n{reminder.raw_data}", "red")
             reminder.remove_from_db()
             continue
         await reminder.callback()
