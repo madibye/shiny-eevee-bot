@@ -53,12 +53,20 @@ discord_token = os.environ.get("PRINCESS_TRIXIE_TOKEN")
 bot_application_id = 925087331915022377
 discord_cogs = [
     "cogs.reminders",
-    "cogs.type",
+    "cogs.fun",
     "cogs.threads",
     "cogs.roles",
     "cogs.notifications",
     "cogs.role_picker",
     "cogs.starboard",
+]
+
+magicball_answers = [
+    "It is certain.", "It is decidedly so.", "Without a doubt.", "Yes, definitely.", "You may rely on it.",
+    "As I see it, yes.", "Most likely.", "Outlook: Good.", "Yes.", "Signs point to yes.", "Reply hazy, try again.",
+    "Ask again later.", "Better not tell you now.", "Cannot predict now.", "Concentrate and ask again.",
+    "Don't count on it.", "My reply is no.", "My sources say no.", "Outlook: Not so good.", "Very doubtful.",
+    "You are unworthy of an answer. Consult <@134826546694193153> for further instruction.",
 ]
 
 default_role_picker_info = {}

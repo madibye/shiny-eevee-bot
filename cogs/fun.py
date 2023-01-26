@@ -1,4 +1,5 @@
 from typing import List, Dict
+import random
 
 from discord import Object, Embed
 from discord.ext.commands import Context, Cog, command
@@ -8,9 +9,20 @@ from helpers import command_helpers
 from helpers.type_matchups import type_list, PType
 
 
-class Type(Cog, name="Type"):
+class Fun(Cog, name="Fun"):
     def __init__(self, bot):
         self.bot = bot
+
+    @command(name="magicball", aliases=["8", "8ball"])
+    async def magicball(self, ctx):
+        answer = random.choice(config.magicball_answers)
+        await ctx.send(answer)
+
+    @command(name="pick", aliases=["p"])
+    async def pick(self, ctx, *, options: str):
+        options_list = options.split(',')
+        answer = random.choice(options_list).strip()
+        await ctx.send(f"I've decided, you should pick **{answer}**!")
 
     @command(name="weakness", aliases=["weak", "w"])
     async def weakness(self, ctx: Context):
@@ -58,4 +70,4 @@ class Type(Cog, name="Type"):
         return await ctx.send(embed=embed)
 
 async def setup(client):
-    await client.add_cog(Type(client), guild=Object(id=config.guild_id))
+    await client.add_cog(Fun(client), guild=Object(id=config.guild_id))
