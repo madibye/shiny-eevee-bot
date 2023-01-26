@@ -9,7 +9,7 @@ from discord.ui import Button
 from config import *
 from helpers import db, paginator
 from helpers.component_globals import ComponentBase
-from main import MadiBot
+from main import Madi
 
 
 class RoleButtonCreator(Button):
@@ -32,7 +32,7 @@ class RoleButtons(ComponentBase):
 
 class RolePicker(commands.Cog, name="role_picker"):
     def __init__(self, bot):
-        self.bot: MadiBot = bot
+        self.bot: Madi = bot
         self.guild: Guild | None = None
 
     @commands.Cog.listener()

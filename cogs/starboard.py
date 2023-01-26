@@ -5,7 +5,7 @@ from discord.ext import commands
 import config
 from helpers import db
 from helpers.component_globals import ComponentBase
-from main import MadiBot
+from main import Madi
 
 
 class StarboardView(ComponentBase):
@@ -18,7 +18,7 @@ class StarboardView(ComponentBase):
 
 class Starboard(commands.Cog, name="Starboard"):
     def __init__(self, bot):
-        self.bot: MadiBot = bot
+        self.bot: Madi = bot
         self.guild: Guild | None = None
         self.starboard_channel: TextChannel | None = None
         self.starboarded_messages: list = []

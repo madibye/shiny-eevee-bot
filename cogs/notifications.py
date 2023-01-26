@@ -3,12 +3,12 @@ from discord.ext import commands
 
 import config
 from helpers import scheduler
-from main import MadiBot
+from main import Madi
 
 
 class Notifications(commands.Cog, name="notifications"):
     def __init__(self, bot):
-        self.bot: MadiBot = bot
+        self.bot: Madi = bot
         self.guild: Guild | None = None
         self.ccgse_channel: TextChannel | None = None
         self.club_channel: Thread | None = None

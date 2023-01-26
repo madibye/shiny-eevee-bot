@@ -8,12 +8,12 @@ from discord.ext import commands
 import config
 from helpers import db, scheduler, embedding
 from helpers.scheduler import ScheduledEvent, ScheduledEventType as SET
-from main import MadiBot
+from main import Madi
 
 
 class Reminders(commands.Cog, name="Reminders"):
     def __init__(self, bot):
-        self.bot: MadiBot = bot
+        self.bot: Madi = bot
         self.guild: Guild | None = None
 
     @commands.Cog.listener()
