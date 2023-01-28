@@ -26,9 +26,11 @@ class Fun(Cog, name="Fun"):
 
     @command(name="weakness", aliases=["weak", "w"])
     async def weakness(self, ctx: Context):
-        types: List[PTN] = [*set(PTN[t.capitalize()] for t in command_helpers.remove_empty_items(
+        type_input: List[PTN] = [PTN[t.capitalize()] for t in command_helpers.remove_empty_items(
             " ".join(command_helpers.parse_args(ctx)).replace("/", " ").lower().split(" ")
-        ))]
+        )]
+        types = []
+        [types.append(t) for t in type_input if t not in types]
         type_matchups: Dict[PTN, int] = {_type: 1 for _type in type_list}
         for t in types:
             if t not in type_matchups.keys():
