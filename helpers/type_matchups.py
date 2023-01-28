@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from enum import StrEnum, auto
 
 
@@ -21,106 +20,102 @@ class PokemonTypeName(StrEnum):
     Dragon = auto()
     Dark = auto()
     Fairy = auto()
-    
 
-@dataclass
-class PokemonType:
-    weak: list[PokemonTypeName]
-    resist: list[PokemonTypeName]
-    immune: list[PokemonTypeName]
+    def get_type_matchups(self):
+        type_matchups.get(self, {})
 
 
 PTN = PokemonTypeName
 
-type_list: dict[PTN, PokemonType] = {
-    PTN.Normal: PokemonType(
-        weak=[PTN.Fighting],
-        resist=[],
-        immune=[PTN.Ghost],
-    ),
-    PTN.Fighting: PokemonType(
-        weak=[PTN.Fairy, PTN.Flying, PTN.Psychic],
-        resist=[PTN.Bug, PTN.Dark, PTN.Rock],
-        immune=[],
-    ),
-    PTN.Flying: PokemonType(
-        weak=[PTN.Electric, PTN.Ice, PTN.Rock],
-        resist=[PTN.Bug, PTN.Fighting, PTN.Grass],
-        immune=[PTN.Ground],
-    ),
-    PTN.Poison: PokemonType(
-        weak=[PTN.Ground, PTN.Psychic],
-        resist=[PTN.Grass, PTN.Fighting, PTN.Poison, PTN.Bug, PTN.Fairy],
-        immune=[],
-    ),
-    PTN.Ground: PokemonType(
-        weak=[PTN.Water, PTN.Grass, PTN.Ice],
-        resist=[PTN.Poison, PTN.Rock],
-        immune=[PTN.Electric],
-    ),
-    PTN.Rock: PokemonType(
-        weak=[PTN.Water, PTN.Grass, PTN.Fighting, PTN.Ground, PTN.Steel],
-        resist=[PTN.Normal, PTN.Fire, PTN.Poison, PTN.Flying],
-        immune=[],
-    ),
-    PTN.Bug: PokemonType(
-        weak=[PTN.Fire, PTN.Flying, PTN.Rock],
-        resist=[PTN.Grass, PTN.Fighting, PTN.Ground],
-        immune=[],
-    ),
-    PTN.Ghost: PokemonType(
-        weak=[PTN.Ghost, PTN.Dark],
-        resist=[PTN.Poison, PTN.Bug],
-        immune=[PTN.Normal, PTN.Fighting],
-    ),
-    PTN.Steel: PokemonType(
-        weak=[PTN.Fire, PTN.Fighting, PTN.Ground],
-        resist=[PTN.Normal, PTN.Grass, PTN.Ice, PTN.Flying, PTN.Psychic, PTN.Bug, PTN.Rock, PTN.Dragon, PTN.Steel, PTN.Fairy],
-        immune=[PTN.Poison],
-    ),
-    PTN.Fire: PokemonType(
-        weak=[PTN.Water, PTN.Ground, PTN.Rock],
-        resist=[PTN.Fire, PTN.Grass, PTN.Ice, PTN.Bug, PTN.Steel, PTN.Fairy],
-        immune=[],
-    ),
-    PTN.Water: PokemonType(
-        weak=[PTN.Electric, PTN.Grass],
-        resist=[PTN.Fire, PTN.Water, PTN.Ice, PTN.Steel],
-        immune=[],
-    ),
-    PTN.Grass: PokemonType(
-        weak=[PTN.Fire, PTN.Ice, PTN.Poison, PTN.Flying, PTN.Bug],
-        resist=[PTN.Water, PTN.Electric, PTN.Grass, PTN.Ground],
-        immune=[],
-    ),
-    PTN.Electric: PokemonType(
-        weak=[PTN.Ground],
-        resist=[PTN.Electric, PTN.Flying, PTN.Steel],
-        immune=[],
-    ),
-    PTN.Psychic: PokemonType(
-        weak=[PTN.Bug, PTN.Dark, PTN.Ghost],
-        resist=[PTN.Fighting, PTN.Psychic],
-        immune=[],
-    ),
-    PTN.Ice: PokemonType(
-        weak=[PTN.Fire, PTN.Fighting, PTN.Rock, PTN.Steel],
-        resist=[PTN.Ice],
-        immune=[],
-    ),
-    PTN.Dragon: PokemonType(
-        weak=[PTN.Ice, PTN.Dragon, PTN.Fairy],
-        resist=[PTN.Fire, PTN.Water, PTN.Electric, PTN.Grass],
-        immune=[],
-    ),
-    PTN.Dark: PokemonType(
-        weak=[PTN.Fighting, PTN.Bug, PTN.Fairy],
-        resist=[PTN.Ghost, PTN.Dark],
-        immune=[PTN.Psychic],
-    ),
-    PTN.Fairy: PokemonType(
-        weak=[PTN.Poison, PTN.Steel],
-        resist=[PTN.Dark, PTN.Fighting, PTN.Bug],
-        immune=[PTN.Dragon],
-    ),
+type_matchups: dict[PTN, dict[int, PTN]] = {
+    PTN.Normal: {
+        2: [PTN.Fighting],
+        0.5: [],
+        0: [PTN.Ghost],
+    },
+    PTN.Fighting: {
+        2: [PTN.Fairy, PTN.Flying, PTN.Psychic],
+        0.5: [PTN.Bug, PTN.Dark, PTN.Rock],
+        0: [],
+    },
+    PTN.Flying: {
+        2: [PTN.Electric, PTN.Ice, PTN.Rock],
+        0.5: [PTN.Bug, PTN.Fighting, PTN.Grass],
+        0: [PTN.Ground],
+    },
+    PTN.Poison: {
+        2: [PTN.Ground, PTN.Psychic],
+        0.5: [PTN.Grass, PTN.Fighting, PTN.Poison, PTN.Bug, PTN.Fairy],
+        0: [],
+    },
+    PTN.Ground: {
+        2: [PTN.Water, PTN.Grass, PTN.Ice],
+        0.5: [PTN.Poison, PTN.Rock],
+        0: [PTN.Electric],
+    },
+    PTN.Rock: {
+        2: [PTN.Water, PTN.Grass, PTN.Fighting, PTN.Ground, PTN.Steel],
+        0.5: [PTN.Normal, PTN.Fire, PTN.Poison, PTN.Flying],
+        0: [],
+    },
+    PTN.Bug: {
+        2: [PTN.Fire, PTN.Flying, PTN.Rock],
+        0.5: [PTN.Grass, PTN.Fighting, PTN.Ground],
+        0: [],
+    },
+    PTN.Ghost: {
+        2: [PTN.Ghost, PTN.Dark],
+        0.5: [PTN.Poison, PTN.Bug],
+        0: [PTN.Normal, PTN.Fighting],
+    },
+    PTN.Steel: {
+        2: [PTN.Fire, PTN.Fighting, PTN.Ground],
+        0.5: [PTN.Normal, PTN.Grass, PTN.Ice, PTN.Flying, PTN.Psychic, PTN.Bug, PTN.Rock, PTN.Dragon, PTN.Steel, PTN.Fairy],
+        0: [PTN.Poison],
+    },
+    PTN.Fire: {
+        2: [PTN.Water, PTN.Ground, PTN.Rock],
+        0.5: [PTN.Fire, PTN.Grass, PTN.Ice, PTN.Bug, PTN.Steel, PTN.Fairy],
+        0: [],
+    },
+    PTN.Water: {
+        2: [PTN.Electric, PTN.Grass],
+        0.5: [PTN.Fire, PTN.Water, PTN.Ice, PTN.Steel],
+        0: [],
+    },
+    PTN.Grass: {
+        2: [PTN.Fire, PTN.Ice, PTN.Poison, PTN.Flying, PTN.Bug],
+        0.5: [PTN.Water, PTN.Electric, PTN.Grass, PTN.Ground],
+        0: [],
+    },
+    PTN.Electric: {
+        2: [PTN.Ground],
+        0.5: [PTN.Electric, PTN.Flying, PTN.Steel],
+        0: [],
+    },
+    PTN.Psychic: {
+        2: [PTN.Bug, PTN.Dark, PTN.Ghost],
+        0.5: [PTN.Fighting, PTN.Psychic],
+        0: [],
+    },
+    PTN.Ice: {
+        2: [PTN.Fire, PTN.Fighting, PTN.Rock, PTN.Steel],
+        0.5: [PTN.Ice],
+        0: [],
+    },
+    PTN.Dragon: {
+        2: [PTN.Ice, PTN.Dragon, PTN.Fairy],
+        0.5: [PTN.Fire, PTN.Water, PTN.Electric, PTN.Grass],
+        0: [],
+    },
+    PTN.Dark: {
+        2: [PTN.Fighting, PTN.Bug, PTN.Fairy],
+        0.5: [PTN.Ghost, PTN.Dark],
+        0: [PTN.Psychic],
+    },
+    PTN.Fairy: {
+        2: [PTN.Poison, PTN.Steel],
+        0.5: [PTN.Dark, PTN.Fighting, PTN.Bug],
+        0: [PTN.Dragon],
+    },
 }

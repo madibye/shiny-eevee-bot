@@ -6,7 +6,7 @@ from discord.ext.commands import Context, Cog, command
 
 import config
 from helpers import command_helpers
-from helpers.type_matchups import type_list, PTN
+from helpers.type_matchups import type_matchups, PTN
 
 
 class Fun(Cog, name="Fun"):
@@ -27,31 +27,21 @@ class Fun(Cog, name="Fun"):
     @command(name="weakness", aliases=["weak", "w"])
     async def weakness(self, ctx: Context):
         type_input: List[PTN] = [PTN[t.capitalize()] for t in command_helpers.remove_empty_items(
-            " ".join(command_helpers.parse_args(ctx)).replace("/", " ").lower().split(" ")
-        )]
-        types = []
-        [types.append(t) for t in type_input if t not in types]
-        type_matchups: Dict[PTN, int] = {_type: 1 for _type in type_list}
+            " ".join(command_helpers.parse_args(ctx)).replace("/", " ").lower().split(" "))]
+        types = [t for i, t in enumerate(type_input) if t not in type_input[:i]]
+        matchups: Dict[PTN, int] = {_type: 1 for _type in PTN}
         for t in types:
-            if t not in type_matchups.keys():
+            if t not in matchups:
                 return await ctx.send("looks like there's something wrong with the list of types you gave me...")
-            for w in type_list[t].weak:
-                type_matchups[w] *= 2
-            for r in type_list[t].resist:
-                type_matchups[r] *= 0.5
-            for i in type_list[t].immune:
-                type_matchups[i] = 0
-        matchup_lists: Dict[str, str] = {"Weaknesses": "", "Resistances": "", "Immunities": ""}
-        for key in type_matchups:
-            mult = type_matchups[key]
-            if mult == 0:
-                matchup_lists["Immunities"] += f"{key.name}, "
-            elif mult > 1:
-                matchup_lists["Weaknesses"] += f"{key.name}{f' ({mult}x)' if mult != 2 else ''}, "
-            elif mult < 1:
-                matchup_lists["Resistances"] += f"{key.name}{f' ({mult}x)' if mult != 0.5 else ''}, "
+            for mult, mult_type in t.get_type_matchups().items():
+                matchups[mult_type] *= mult
         embed = Embed(title="**Type Matchups**", description=f"{'/'.join([_type.name.capitalize() for _type in types])}-type")
-        [embed.add_field(name=key, value=matchup_lists[key][0:-2], inline=False) for key in matchup_lists if len(matchup_lists[key]) > 0]
+        embed.add_field(name="Weaknesses", inline=False, value=", ".join(
+            [f"{key.name}{f' ({matchups[key]}x)' if matchups[key] != 2 else ''}" for key in matchups if matchups[key] > 1]))
+        embed.add_field(name="Resistances", inline=False, value=", ".join(
+            [f"{key.name}{f' ({matchups[key]}x)' if matchups[key] != 0.5 else ''}"
+             for key in matchups if matchups[key] < 1 and matchups[key] != 0]))
+        embed.add_field(name="Immunities", inline=False, value=", ".join([key.name for key in matchups if matchups[key] == 0]))
         return await ctx.send(embed=embed)
 
 async def setup(client):
