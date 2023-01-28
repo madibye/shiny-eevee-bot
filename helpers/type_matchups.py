@@ -1,102 +1,126 @@
 from dataclasses import dataclass
-from typing import List, Dict
+from enum import StrEnum, auto
+
+
+class PokemonTypeName(StrEnum):
+    Normal = auto()
+    Fighting = auto()
+    Flying = auto()
+    Poison = auto()
+    Ground = auto()
+    Rock = auto()
+    Bug = auto()
+    Ghost = auto()
+    Steel = auto()
+    Fire = auto()
+    Water = auto()
+    Grass = auto()
+    Electric = auto()
+    Psychic = auto()
+    Ice = auto()
+    Dragon = auto()
+    Dark = auto()
+    Fairy = auto()
+    
 
 @dataclass
-class PType:
-    weak: List[str]
-    resist: List[str]
-    immune: List[str]
+class PokemonType:
+    weak: list[PokemonTypeName]
+    resist: list[PokemonTypeName]
+    immune: list[PokemonTypeName]
 
 
-type_list: Dict[str, PType] = {
-    "normal": PType(
-        weak=["fighting"],
+PTN = PokemonTypeName
+
+type_list: dict[PTN, PokemonType] = {
+    PTN.Normal: PokemonType(
+        weak=[PTN.Fighting],
         resist=[],
-        immune=["ghost"],
+        immune=[PTN.Ghost],
     ),
-    "fighting": PType(
-        weak=["fairy", "flying", "psychic"],
-        resist=["bug", "dark", "rock"],
+    PTN.Fighting: PokemonType(
+        weak=[PTN.Fairy, PTN.Flying, PTN.Psychic],
+        resist=[PTN.Bug, PTN.Dark, PTN.Rock],
         immune=[],
     ),
-    "flying": PType(
-        weak=["electric", "ice", "rock"],
-        resist=["bug", "fighting", "grass"],
-        immune=["ground"],
+    PTN.Flying: PokemonType(
+        weak=[PTN.Electric, PTN.Ice, PTN.Rock],
+        resist=[PTN.Bug, PTN.Fighting, PTN.Grass],
+        immune=[PTN.Ground],
     ),
-    "poison": PType(
-        weak=["ground", "psychic"],
-        resist=["grass", "fighting", "poison", "bug", "fairy"],
+    PTN.Poison: PokemonType(
+        weak=[PTN.Ground, PTN.Psychic],
+        resist=[PTN.Grass, PTN.Fighting, PTN.Poison, PTN.Bug, PTN.Fairy],
         immune=[],
     ),
-    "ground": PType(
-        weak=["water", "grass", "ice"],
-        resist=["poison", "rock"],
-        immune=["electric"],
+    PTN.Ground: PokemonType(
+        weak=[PTN.Water, PTN.Grass, PTN.Ice],
+        resist=[PTN.Poison, PTN.Rock],
+        immune=[PTN.Electric],
     ),
-    "rock": PType(
-        weak=["water", "grass", "fighting", "ground", "steel"],
-        resist=["normal", "fire", "poison", "flying"],
+    PTN.Rock: PokemonType(
+        weak=[PTN.Water, PTN.Grass, PTN.Fighting, PTN.Ground, PTN.Steel],
+        resist=[PTN.Normal, PTN.Fire, PTN.Poison, PTN.Flying],
         immune=[],
     ),
-    "bug": PType(
-        weak=["fire", "flying", "rock"],
-        resist=["grass", "fighting", "ground"],
+    PTN.Bug: PokemonType(
+        weak=[PTN.Fire, PTN.Flying, PTN.Rock],
+        resist=[PTN.Grass, PTN.Fighting, PTN.Ground],
         immune=[],
     ),
-    "ghost": PType(
-        weak=["ghost", "dark"],
-        resist=["poison", "bug"],
-        immune=["normal", "fighting"],
+    PTN.Ghost: PokemonType(
+        weak=[PTN.Ghost, PTN.Dark],
+        resist=[PTN.Poison, PTN.Bug],
+        immune=[PTN.Normal, PTN.Fighting],
     ),
-    "steel": PType(
-        weak=["fire", "fighting", "ground"],
-        resist=["normal", "grass", "ice", "flying", "psychic", "bug", "rock", "dragon", "steel", "fairy"],
-        immune=["poison"],
+    PTN.Steel: PokemonType(
+        weak=[PTN.Fire, PTN.Fighting, PTN.Ground],
+        resist=[PTN.Normal, PTN.Grass, PTN.Ice, PTN.Flying, PTN.Psychic, PTN.Bug, PTN.Rock, PTN.Dragon, PTN.Steel, PTN.Fairy],
+        immune=[PTN.Poison],
     ),
-    "fire": PType(
-        weak=["water", "ground", "rock"],
-        resist=["fire", "grass", "ice", "bug", "steel", "fairy"],
+    PTN.Fire: PokemonType(
+        weak=[PTN.Water, PTN.Ground, PTN.Rock],
+        resist=[PTN.Fire, PTN.Grass, PTN.Ice, PTN.Bug, PTN.Steel, PTN.Fairy],
         immune=[],
     ),
-    "water": PType(
-        weak=["electric", "grass"],
-        resist=["fire", "water", "ice", "steel"],
+    PTN.Water: PokemonType(
+        weak=[PTN.Electric, PTN.Grass],
+        resist=[PTN.Fire, PTN.Water, PTN.Ice, PTN.Steel],
         immune=[],
     ),
-    "grass": PType(
-        weak=["fire", "ice", "poison", "flying", "bug"],
-        resist=["water", "electric", "grass", "ground"],
+    PTN.Grass: PokemonType(
+        weak=[PTN.Fire, PTN.Ice, PTN.Poison, PTN.Flying, PTN.Bug],
+        resist=[PTN.Water, PTN.Electric, PTN.Grass, PTN.Ground],
         immune=[],
     ),
-    "electric": PType(
-        weak=["ground"],
-        resist=["electric", "flying", "steel"],
+    PTN.Electric: PokemonType(
+        weak=[PTN.Ground],
+        resist=[PTN.Electric, PTN.Flying, PTN.Steel],
         immune=[],
     ),
-    "psychic": PType(
-        weak=["bug", "dark", "ghost"],
-        resist=["fighting", "psychic"],
+    PTN.Psychic: PokemonType(
+        weak=[PTN.Bug, PTN.Dark, PTN.Ghost],
+        resist=[PTN.Fighting, PTN.Psychic],
         immune=[],
     ),
-    "ice": PType(
-        weak=["fire", "fighting", "rock", "steel"],
-        resist=["ice"],
+    PTN.Ice: PokemonType(
+        weak=[PTN.Fire, PTN.Fighting, PTN.Rock, PTN.Steel],
+        resist=[PTN.Ice],
         immune=[],
     ),
-    "dragon": PType(
-        weak=["ice", "dragon", "fairy"],
-        resist=["fire", "water", "electric", "grass"],
+    PTN.Dragon: PokemonType(
+        weak=[PTN.Ice, PTN.Dragon, PTN.Fairy],
+        resist=[PTN.Fire, PTN.Water, PTN.Electric, PTN.Grass],
         immune=[],
     ),
-    "dark": PType(
-        weak=["fighting", "bug", "fairy"],
-        resist=["ghost", "dark"],
-        immune=["psychic"],
+    PTN.Dark: PokemonType(
+        weak=[PTN.Fighting, PTN.Bug, PTN.Fairy],
+        resist=[PTN.Ghost, PTN.Dark],
+        immune=[PTN.Psychic],
     ),
-    "fairy": PType(
-        weak=["poison", "steel"],
-        resist=["dark", "fighting", "bug"],
-        immune=["dragon"],
+    PTN.Fairy: PokemonType(
+        weak=[PTN.Poison, PTN.Steel],
+        resist=[PTN.Dark, PTN.Fighting, PTN.Bug],
+        immune=[PTN.Dragon],
     ),
 }
