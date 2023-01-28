@@ -22,7 +22,7 @@ class PokemonTypeName(StrEnum):
     Fairy = auto()
 
     def get_type_matchups(self):
-        type_matchups.get(self, {})
+        return type_matchups.get(self, {})
 
 
 PTN = PokemonTypeName
