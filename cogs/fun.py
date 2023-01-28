@@ -6,7 +6,7 @@ from discord.ext.commands import Context, Cog, command
 
 import config
 from helpers import command_helpers
-from helpers.type_matchups import type_matchups, PTN
+from helpers.type_matchups import PTN
 
 
 class Fun(Cog, name="Fun"):
@@ -28,14 +28,15 @@ class Fun(Cog, name="Fun"):
     async def weakness(self, ctx: Context):
         type_input: List[PTN] = [PTN[t.capitalize()] for t in command_helpers.remove_empty_items(
             " ".join(command_helpers.parse_args(ctx)).replace("/", " ").lower().split(" "))]
-        types = [t for i, t in enumerate(type_input) if t not in type_input[:i]]
+        types = [t for i, t in enumerate(type_input) if (t not in type_input[:i]) and (t in PTN)]
+        if not types:
+            return await ctx.send("looks like there's something wrong with the list of types you gave me...")
         matchups: Dict[PTN, int] = {_type: 1 for _type in PTN}
         for t in types:
-            if t not in matchups:
-                return await ctx.send("looks like there's something wrong with the list of types you gave me...")
-            for mult, mult_type in t.get_type_matchups().items():
-                matchups[mult_type] *= mult
-        embed = Embed(title="**Type Matchups**", description=f"{'/'.join([_type.name.capitalize() for _type in types])}-type")
+            for mult, mult_types in t.get_type_matchups().items():
+                for mult_type in mult_types:
+                    matchups[mult_type] *= mult
+        embed = Embed(title="**Type Matchups**", description=f"{'/'.join([t.name.capitalize() for t in types])}-type")
         embed.add_field(name="Weaknesses", inline=False, value=", ".join(
             [f"{key.name}{f' ({matchups[key]}x)' if matchups[key] != 2 else ''}" for key in matchups if matchups[key] > 1]))
         embed.add_field(name="Resistances", inline=False, value=", ".join(

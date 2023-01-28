@@ -27,7 +27,7 @@ class PokemonTypeName(StrEnum):
 
 PTN = PokemonTypeName
 
-type_matchups: dict[PTN, dict[int, PTN]] = {
+type_matchups: dict[PTN, dict[int, list[PTN]]] = {
     PTN.Normal: {
         2: [PTN.Fighting],
         0.5: [],
