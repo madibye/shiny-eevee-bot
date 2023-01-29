@@ -1,10 +1,10 @@
-import io
+from io import BytesIO
 
 import aiohttp
-from discord import Guild, app_commands, Object, File
+from discord import Guild, app_commands, Object
+from discord.errors import Forbidden, HTTPException
 from discord.ext import commands
 from discord.utils import MISSING
-from discord.errors import Forbidden, HTTPException
 
 import config
 from helpers import db
@@ -28,13 +28,13 @@ class Roles(commands.Cog, name="roles"):
         if not name and not color and not icon:
             return await interaction.response.send_message(f"oh okay... but nothing changed :(", ephemeral=True)
         custom_roles_db = db.get_custom_roles()
-        icon_file: File | None = None
+        icon_file: BytesIO | None = None
         if icon:
             async with aiohttp.ClientSession() as session:
                 async with session.get(icon) as resp:
                     if resp.status != 200:
-                        return await interaction.response.send_message('Could not download file...', ephemeral=True)
-                    icon_file = File(io.BytesIO(await resp.read()))
+                        return await interaction.response.send_message('Sorry, I couldn\'t download the file... :(', ephemeral=True)
+                    icon_file = BytesIO(await resp.read())
         if not custom_roles_db.get(str(interaction.user.id)):
             if not name:
                 name = interaction.user.display_name
