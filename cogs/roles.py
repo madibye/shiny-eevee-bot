@@ -36,7 +36,7 @@ class Roles(commands.Cog, name="roles"):
                     if resp.status != 200:
                         return await interaction.response.send_message("sorry, i couldn\'t download the file... :(", ephemeral=True)
                     icon_file = await resp.read()
-                    if sys.getsizeof(icon_file) <= 256000:
+                    if sys.getsizeof(icon_file) >= 256000:
                         return await interaction.response.send_message("sorry, this file is too big, they have to be under 256kb!! :(", ephemeral=True)
         if not custom_roles_db.get(str(interaction.user.id)):
             if not name:
