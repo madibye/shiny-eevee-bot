@@ -1,4 +1,4 @@
-from io import BytesIO
+import sys
 
 import aiohttp
 from discord import Guild, app_commands, Object
@@ -28,13 +28,14 @@ class Roles(commands.Cog, name="roles"):
         if not name and not color and not icon:
             return await interaction.response.send_message(f"oh okay... but nothing changed :(", ephemeral=True)
         custom_roles_db = db.get_custom_roles()
-        icon_file: BytesIO | None = None
+        icon_file: bytes | None = None
         if icon:
             async with aiohttp.ClientSession() as session:
                 async with session.get(icon) as resp:
                     if resp.status != 200:
                         return await interaction.response.send_message('Sorry, I couldn\'t download the file... :(', ephemeral=True)
-                    icon_file = BytesIO(await resp.read())
+                    icon_file = await resp.read()
+                    print(sys.getsizeof(icon_file))
         if not custom_roles_db.get(str(interaction.user.id)):
             if not name:
                 name = interaction.user.display_name
