@@ -76,7 +76,7 @@ class Starboard(commands.Cog, name="Starboard"):
         await msg.delete()
 
     @staticmethod
-    async def starboard_file(msg):
+    async def starboard_file(msg: Message):
         if len(msg.attachments) > 0:
             if msg.attachments[0].content_type.startswith("video/"):
                 attachment_file: File = await msg.attachments[0].to_file()
