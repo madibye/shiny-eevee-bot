@@ -23,7 +23,8 @@ class Roles(commands.Cog, name="roles"):
 
     @app_commands.command(name="customrole", description="set your own custom role color with this nice little slash command :)")
     @app_commands.describe(color="the hex color for your role. you can leave out the # if you like. set to 0 to clear color!",
-                           name="the name for your role. leave it blank if you don't wanna change it!")
+                           name="the name for your role. leave it blank if you don't wanna change it!",
+                           icon="the URL of a role icon you want. must be under 256kb!!")
     async def custom_role(self, interaction: Interaction, color: str | None = None, name: str | None = None, icon: str | None = None):
         if not name and not color and not icon:
             return await interaction.response.send_message(f"oh okay... but nothing changed :(", ephemeral=True)
@@ -33,9 +34,10 @@ class Roles(commands.Cog, name="roles"):
             async with aiohttp.ClientSession() as session:
                 async with session.get(icon) as resp:
                     if resp.status != 200:
-                        return await interaction.response.send_message('Sorry, I couldn\'t download the file... :(', ephemeral=True)
+                        return await interaction.response.send_message("sorry, i couldn\'t download the file... :(", ephemeral=True)
                     icon_file = await resp.read()
-                    print(sys.getsizeof(icon_file))
+                    if sys.getsizeof(icon_file) <= 256000:
+                        return await interaction.response.send_message("sorry, this file is too big, they have to be under 256kb!! :(", ephemeral=True)
         if not custom_roles_db.get(str(interaction.user.id)):
             if not name:
                 name = interaction.user.display_name
@@ -52,8 +54,8 @@ class Roles(commands.Cog, name="roles"):
                 colour=int(color.replace('#', ''), base=16) if color else MISSING,
                 display_icon=icon_file if icon_file else MISSING)
         except (Forbidden, HTTPException, ValueError):
-            return await interaction.response.send_message(f"Sorry, something went wrong while updating your role.")
-        return await interaction.response.send_message(f"Your custom role has been set to <@&{role.id}>!", ephemeral=True)
+            return await interaction.response.send_message(f"sorry, something went wrong while updating your role :(")
+        return await interaction.response.send_message(f"okay, your custom role has been set to <@&{role.id}>!!", ephemeral=True)
 
     @commands.command(name="setcustomrole", aliases=["scr"])
     @commands.has_role("alpha koala")
