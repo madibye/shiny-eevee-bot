@@ -23,28 +23,24 @@ class Fun(Cog, name="Fun"):
         if len(options_list) == 0:
             return  # Died
         pick_total = 1
-        if (options_list or [""])[0].startswith(("pick:", "choose:", "total:", "p:")):
+        if options.startswith(("pick:", "choose:", "total:", "p:")):
             if (
                 stripped_first_option := options_list[0].removeprefix("pick:").removeprefix("choose:")
-                        .removeprefix("total:").removeprefix("p:")
-            ).isnumeric():
+                    .removeprefix("total:").removeprefix("p:")
+            ).split(" ")[0].isnumeric():
                 options_list[0] = stripped_first_option
                 if len(split_first_option := stripped_first_option.split(" ")) > 1:
                     options_list[0] = split_first_option[0]
                     options_list.insert(1, " ".join(split_first_option[1:]))
                 pick_total = int(options_list.pop(0))
-        print(pick_total)
         answers = []
         while len(answers) < pick_total and len(options_list):
-            choice: str = random.choice(options_list)
-            if not choice.isspace():
+            if not (choice := random.choice(options_list)).isspace():
                 answers.append(choice.strip())
             options_list.remove(choice)
-        print(options_list)
-        print(answers)
-        if len(options_list) == 2:
+        if len(answers) == 2:
             answers_str = ' and '.join(answers)
-        elif len(options_list) == 1:
+        elif len(answers) == 1:
             answers_str = answers[0]
         else:
             answers[-1] = f'and {answers[-1]}'
