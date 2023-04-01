@@ -1,5 +1,4 @@
 import random
-from typing import List, Dict
 
 from discord import Object, Embed
 from discord.ext.commands import Context, Cog, command
@@ -20,18 +19,37 @@ class Fun(Cog, name="Fun"):
 
     @command(name="pick", aliases=["p"])
     async def pick(self, ctx, *, options: str):
-        options_list = options.split(',')
-        answer = random.choice(options_list).strip()
-        await ctx.send(f"I've decided, you should pick **{answer}**!")
+        options_list: list[str] = options.split(',')
+        if len(options_list) == 0:
+            return  # Died
+        pick_total = 1
+        if (options_list or [""])[0].startswith("pick:"):
+            if options_list[0].isnumeric():
+                pick_total = int(options_list.pop(0))
+        answers = []
+        for i in range(1, pick_total+1):
+            if len(options_list) == 0:
+                break
+            choice = random.choice(options_list)
+            answers.append(choice.strip())
+            options_list.remove(choice)
+        if len(options_list) == 2:
+            answers_str = ' and '.join(answers)
+        elif len(options_list) == 1:
+            answers_str = answers[0]
+        else:
+            answers[-1] = f'and {answers[-1]}'
+            answers_str = ', '.join(answers)
+        await ctx.send(f"I've decided, you should pick **{answers_str}**!")
 
     @command(name="weakness", aliases=["weak", "w"])
     async def weakness(self, ctx: Context):
-        type_input: List[PTN] = [PTN[t.capitalize()] for t in command_helpers.remove_empty_items(
+        type_input: list[PTN] = [PTN[t.capitalize()] for t in command_helpers.remove_empty_items(
             " ".join(command_helpers.parse_args(ctx)).replace("/", " ").lower().split(" "))]
         types = [t for i, t in enumerate(type_input) if (t not in type_input[:i]) and (t in PTN)]
         if not types:
             return await ctx.send("looks like there's something wrong with the list of types you gave me...")
-        matchups: Dict[PTN, int] = {_type: 1 for _type in PTN}
+        matchups: dict[PTN, int] = {_type: 1 for _type in PTN}
         for t in types:
             for mult, mult_types in t.get_type_matchups().items():
                 for mult_type in mult_types:
