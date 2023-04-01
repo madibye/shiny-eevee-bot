@@ -25,7 +25,9 @@ class Fun(Cog, name="Fun"):
         pick_total = 1
         if (options_list or [""])[0].startswith(("pick:", "choose:", "total:", "p:")):
             if options_list[0].isnumeric():
-                pick_total = int(options_list.pop(0))
+                if len(split_first_option := options_list[0].split(" ")) > 1:
+                    options_list.insert(1, " ".join(split_first_option))
+                pick_total = int(options_list.pop(0).removeprefix("pick:").removeprefix("choose:").removeprefix("total:").removeprefix("p:"))
         answers = []
         for i in range(1, pick_total+1):
             if len(options_list) == 0:
