@@ -28,13 +28,16 @@ class Fun(Cog, name="Fun"):
                 if len(split_first_option := options_list[0].split(" ")) > 1:
                     options_list.insert(1, " ".join(split_first_option))
                 pick_total = int(options_list.pop(0).removeprefix("pick:").removeprefix("choose:").removeprefix("total:").removeprefix("p:"))
+        print(pick_total)
         answers = []
-        for i in range(1, pick_total+1):
+        while len(answers) > pick_total:
             if len(options_list) == 0:
                 break
-            choice = random.choice(options_list)
-            answers.append(choice.strip())
+            choice: str = random.choice(options_list)
+            if not choice.isspace():
+                answers.append(choice.strip())
             options_list.remove(choice)
+        print(options_list)
         if len(options_list) == 2:
             answers_str = ' and '.join(answers)
         elif len(options_list) == 1:
