@@ -23,7 +23,7 @@ class Fun(Cog, name="Fun"):
         if len(options_list) == 0:
             return  # Died
         pick_total = 1
-        if (options_list or [""])[0].startswith("pick:"):
+        if (options_list or [""])[0].startswith(("pick:", "choose:", "total:", "p:")):
             if options_list[0].isnumeric():
                 pick_total = int(options_list.pop(0))
         answers = []
