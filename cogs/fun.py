@@ -35,14 +35,13 @@ class Fun(Cog, name="Fun"):
                 pick_total = int(options_list.pop(0))
         print(pick_total)
         answers = []
-        while len(answers) > pick_total:
-            if len(options_list) == 0:
-                break
+        while len(answers) < pick_total and len(options_list):
             choice: str = random.choice(options_list)
             if not choice.isspace():
                 answers.append(choice.strip())
             options_list.remove(choice)
         print(options_list)
+        print(answers)
         if len(options_list) == 2:
             answers_str = ' and '.join(answers)
         elif len(options_list) == 1:
