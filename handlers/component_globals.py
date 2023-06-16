@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 from typing import List
 
-from discord import Interaction, Message, TextStyle
+from discord import Interaction, Message, TextStyle, ButtonStyle
 from discord.ext.commands import Context
-from discord.ui import View, Button, Select, Modal, TextInput
+from discord.ui import View, Button, Select, Modal, TextInput, button
 
 
 @dataclass
@@ -72,7 +72,6 @@ class ModularModal(Modal):
     async def on_submit(self, interaction):
         self.interaction = interaction
         self.stop()
-
 
 # Useful values
 TIMEOUT = 180
