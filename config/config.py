@@ -55,6 +55,7 @@ scv_blocked = {}  # Stub in case we ever want to use this
 discord_token = os.environ.get("PRINCESS_TRIXIE_TOKEN")
 bot_application_id = 925087331915022377
 discord_cogs = [
+    "cogs.admin",
     "cogs.reminders",
     "cogs.fun",
     "cogs.threads",
