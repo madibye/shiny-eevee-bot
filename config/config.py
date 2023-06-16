@@ -37,6 +37,7 @@ command_prefixes = ['!']
 ccgse_notif_role = 996963548959871069
 minecraft_notif_role = 1007714356189991083
 club_notif_role = 1007714385642393655
+top_non_custom_role = 993590393146978419
 
 # Channels
 ccgse_channel = 993962449717960836

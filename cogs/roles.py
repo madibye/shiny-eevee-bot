@@ -120,7 +120,8 @@ class Roles(commands.Cog, name="roles"):
             if not name:
                 name = interaction.user.display_name
             role = await self.guild.create_role(name=name)
-            await role.edit(position=20)
+            top_non_custom_role = self.guild.get_role(config.top_non_custom_role)
+            await role.edit(position=top_non_custom_role.position + 1)
             await interaction.user.add_roles(role)
             database.edit_custom_role(str(interaction.user.id), role.id)
         else:
