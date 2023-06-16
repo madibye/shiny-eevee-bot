@@ -97,7 +97,7 @@ class Roles(commands.Cog, name="roles"):
                 label='Role Name', style=TextStyle.short, placeholder=name_placeholder,
                 max_length=32, required=False, custom_id="name",
             ), TextInputInfo(
-                label='Role Icon', style=TextStyle.short, placeholder=icon_placeholder,
+                label='Role Icon', style=TextStyle.short, placeholder=icon_placeholder[:99],
                 max_length=1000, required=False, custom_id="icon",
             ),]
         )
