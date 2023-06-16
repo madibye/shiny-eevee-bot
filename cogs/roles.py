@@ -91,8 +91,8 @@ class Roles(commands.Cog, name="roles"):
 
     async def get_custom_role_embed(self):
         async for msg in self.roles_channel.history(limit=5):
-            if [c for c in msg.components if c] and msg.author == self.bot.user:
-                if msg.components[0].custom_id == "custom_role_button":
+            if msg.components and msg.author == self.bot.user:
+                if getattr(msg.components[0], "custom_id", None) == "custom_role_button":
                     return msg
 
     async def send_custom_role_embed(self):
