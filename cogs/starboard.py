@@ -39,8 +39,6 @@ class Starboard(commands.Cog, name="Starboard"):
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload: RawReactionActionEvent):
-        if payload.emoji.name != "⭐":
-            return
         try:
             channel: Thread = await self.guild.fetch_channel(payload.channel_id)
             if (getattr(channel, "id", 0) not in config.starboard_allowed_channels or
@@ -51,9 +49,11 @@ class Starboard(commands.Cog, name="Starboard"):
             msg: Message = await channel.fetch_message(payload.message_id)
         except (NotFound, Forbidden, HTTPException, InvalidData):
             return
+        react_users = set()
         for reaction in msg.reactions:
-            if reaction.emoji == '⭐' and hasattr(reaction, "count"):
-                if reaction.count >= lc.starboard_required_reactions and msg.id not in self.starboarded_messages:
+            async for user in reaction.users():
+                react_users.add(user.id)
+                if len(react_users) >= lc.starboard_required_reactions and msg.id not in self.starboarded_messages:
                     await self.post_starboard_msg(msg)
                     self.starboarded_messages.append(msg.id)
                     return database.update_starboard_db("message_ids", self.starboarded_messages)
