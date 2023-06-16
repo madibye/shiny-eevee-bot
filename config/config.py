@@ -44,7 +44,6 @@ minecraft_channel = 1009699321651925022
 club_channel = 991544912556339241
 starboard_channel = 991550133869223937
 starboard_allowed_channels = [991523087348662373, 991544337747951617, 991518171729231924]
-starboard_required_reactions = 5
 
 remindme_ignore_words = ["this"]
 remindme_remove_words = ["in", "and", "on", "at", "@"]

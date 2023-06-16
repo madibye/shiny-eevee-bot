@@ -1,6 +1,8 @@
+from termcolor import cprint
+
 from discord import Guild, TextChannel, RawReactionActionEvent, utils, Message, File, Interaction, Embed, Colour, Thread
 from discord.errors import NotFound, Forbidden, HTTPException, InvalidData
-from discord.ext import commands
+from discord.ext import commands, tasks
 
 import config
 from config.live_config import lc
@@ -22,6 +24,7 @@ class Starboard(commands.Cog, name="Starboard"):
         self.bot: Madi = bot
         self.guild: Guild | None = None
         self.starboard_channel: TextChannel | None = None
+        self.starboard_msg_queue: set = set()
         self.starboarded_messages: list = []
         self.starboard_msg_ids: list = []
 
@@ -36,6 +39,23 @@ class Starboard(commands.Cog, name="Starboard"):
                 self.starboard_msg_ids = starboard_db["starboard_msg_ids"]
         else:
             database.create_starboard_db()
+        try:
+            self.starboard_check_loop.start()
+        except RuntimeError:
+            print("Failed to start starboard check loop as it is already running.")
+
+    @tasks.loop(seconds=3)
+    async def starboard_check_loop(self):
+        for ch_id, msg_id in self.starboard_msg_queue:
+            try:
+                channel = await self.guild.fetch_channel(ch_id)
+                message = await channel.fetch_message(msg_id)
+                await self.post_starboard_msg(message)
+                self.starboarded_messages.append(msg_id)
+                database.update_starboard_db("message_ids", self.starboarded_messages)
+            except Exception as e:
+                cprint(f"Message id {msg_id} in channel id {ch_id} could not be starboarded for reason: {e}", "red")
+        self.starboard_msg_queue = set()
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload: RawReactionActionEvent):
@@ -54,9 +74,7 @@ class Starboard(commands.Cog, name="Starboard"):
             async for user in reaction.users():
                 react_users.add(user.id)
                 if len(react_users) >= lc.starboard_required_reactions and msg.id not in self.starboarded_messages:
-                    await self.post_starboard_msg(msg)
-                    self.starboarded_messages.append(msg.id)
-                    return database.update_starboard_db("message_ids", self.starboarded_messages)
+                    self.starboard_msg_queue.add((msg.channel.id, msg.id))
 
     @commands.Cog.listener()
     async def on_raw_message_edit(self, payload):

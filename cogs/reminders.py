@@ -22,7 +22,7 @@ class Reminders(commands.Cog, name="Reminders"):
         try:
             scheduler.schedule_loop.start(self.bot)
         except RuntimeError:
-            print("Failed to start suggestion loop as it is already running.")
+            print("Failed to start schedule loop as it is already running.")
 
     @commands.command(name="remindme", aliases=["remind", "rm"])
     async def remindme(self, ctx, *, time_and_note):
