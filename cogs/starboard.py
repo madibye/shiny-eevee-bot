@@ -3,8 +3,9 @@ from discord.errors import NotFound, Forbidden, HTTPException, InvalidData
 from discord.ext import commands
 
 import config
-from helpers import db
-from helpers.component_globals import ComponentBase
+from config.live_config import lc
+from handlers import database
+from handlers.component_globals import ComponentBase
 from main import Madi
 
 
@@ -29,12 +30,12 @@ class Starboard(commands.Cog, name="Starboard"):
         self.guild: Guild = self.bot.get_guild(config.guild_id)
         self.starboard_channel: TextChannel = self.guild.get_channel(config.starboard_channel)
 
-        if starboard_db := db.get_starboard_db():
+        if starboard_db := database.get_starboard_db():
             self.starboarded_messages = starboard_db["message_ids"]
             if "starboard_msg_ids" in starboard_db:
                 self.starboard_msg_ids = starboard_db["starboard_msg_ids"]
         else:
-            db.create_starboard_db()
+            database.create_starboard_db()
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload: RawReactionActionEvent):
@@ -52,10 +53,10 @@ class Starboard(commands.Cog, name="Starboard"):
             return
         for reaction in msg.reactions:
             if reaction.emoji == '⭐' and hasattr(reaction, "count"):
-                if reaction.count >= config.starboard_required_reactions and msg.id not in self.starboarded_messages:
+                if reaction.count >= lc.starboard_required_reactions and msg.id not in self.starboarded_messages:
                     await self.post_starboard_msg(msg)
                     self.starboarded_messages.append(msg.id)
-                    return db.update_starboard_db("message_ids", self.starboarded_messages)
+                    return database.update_starboard_db("message_ids", self.starboarded_messages)
 
     @commands.Cog.listener()
     async def on_raw_message_edit(self, payload):
@@ -107,7 +108,7 @@ class Starboard(commands.Cog, name="Starboard"):
             starboard_msg = await self.starboard_channel.fetch_message(msg_tuple[1])
         except NotFound:
             self.starboard_msg_ids.remove(msg_tuple)
-            return db.update_starboard_db("starboard_msg_ids", self.starboard_msg_ids)
+            return database.update_starboard_db("starboard_msg_ids", self.starboard_msg_ids)
         return starboard_msg
 
     async def post_starboard_msg(self, msg):
@@ -116,7 +117,7 @@ class Starboard(commands.Cog, name="Starboard"):
             file=await self.starboard_file(msg),
             view=StarboardView(msg))
         self.starboard_msg_ids.append((msg.id, sb_msg.id))
-        db.update_starboard_db("starboard_msg_ids", self.starboard_msg_ids)
+        database.update_starboard_db("starboard_msg_ids", self.starboard_msg_ids)
 
     async def edit_starboard_msg(self, starboard_msg, msg):
         await starboard_msg.edit(

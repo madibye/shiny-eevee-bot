@@ -49,6 +49,9 @@ starboard_required_reactions = 5
 remindme_ignore_words = ["this"]
 remindme_remove_words = ["in", "and", "on", "at", "@"]
 
+# Live Config
+scv_blocked = {}  # Stub in case we ever want to use this
+
 discord_token = os.environ.get("PRINCESS_TRIXIE_TOKEN")
 bot_application_id = 925087331915022377
 discord_cogs = [

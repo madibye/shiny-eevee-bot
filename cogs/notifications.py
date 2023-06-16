@@ -2,7 +2,7 @@ from discord import Guild, Interaction, Object, app_commands, TextChannel, Threa
 from discord.ext import commands
 
 import config
-from helpers import scheduler
+from handlers import scheduler
 from main import Madi
 
 

@@ -13,8 +13,8 @@ from parsedatetime import Calendar
 from termcolor import cprint
 
 import config
-from helpers import db
-from helpers.component_globals import ComponentBase
+from handlers import database
+from handlers.component_globals import ComponentBase
 from main import Madi
 
 
@@ -95,10 +95,10 @@ class ScheduledEvent:
                 "channel_id": self.channel.id, "url": self.url, "extra_args": self.extra_args}
 
     def add_to_db(self):
-        return db.add_reminder(self.raw_data)
+        return database.add_reminder(self.raw_data)
 
     def remove_from_db(self):
-        return db.delete_reminder(self.raw_data)
+        return database.delete_reminder(self.raw_data)
 
     async def send_reminder(self):
         if isinstance(self.extra_args, dict):
@@ -159,7 +159,7 @@ class ScheduledEvent:
 @tasks.loop(seconds=15)
 async def schedule_loop(bot: Madi):
     current_ts = time.time()
-    for reminder in [reminder_from_dict(bot, r) for r in db.get_all_reminders() if r.get("timestamp", 0) <= current_ts]:
+    for reminder in [reminder_from_dict(bot, r) for r in database.get_all_reminders() if r.get("timestamp", 0) <= current_ts]:
         if (not reminder.channel) and reminder.target and reminder.event_type in [
                 ScheduledEventType.REMINDER, ScheduledEventType.REPEATING_REMINDER]:
             try:
@@ -240,8 +240,8 @@ def clean_sub_tasks(event_type: ScheduledEventType, target_id: int, channel_id: 
                     data.get("event_type", data.get("type")) in [ScheduledEventType.SUB, "sub"]
                     if event_type == ScheduledEventType.SUB else [ScheduledEventType.UNSUB, "unsub"]))
 
-    for raw_reminder in [r for r in db.get_all_reminders() if check_reminder_dict(r)]:
-        db.delete_reminder(raw_reminder)
+    for raw_reminder in [r for r in database.get_all_reminders() if check_reminder_dict(r)]:
+        database.delete_reminder(raw_reminder)
 
 
 def remove_empty_items(items: list):

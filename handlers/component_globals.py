@@ -19,7 +19,7 @@ class TextInputInfo:
 class ModalComponentData:
     def __init__(self, interaction: Interaction):
         self.value: List[str] = [data['components'][0]['value'] for data in interaction.data['components']]
-        self.type: List[int] = [data['components'][0]['type'] for data in interaction.data['components']]
+        self.type: List[int] = [int(data['components'][0]['type']) for data in interaction.data['components']]
         self.custom_id: List[str] = [data['components'][0]['custom_id'] for data in interaction.data['components']]
 
 

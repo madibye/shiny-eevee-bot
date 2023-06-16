@@ -2,7 +2,7 @@ from discord import Thread
 from discord.ext import commands
 from discord.ext.commands import Context
 
-from helpers import db
+from handlers import database
 
 
 class Threads(commands.Cog, name="Threads"):
@@ -13,18 +13,18 @@ class Threads(commands.Cog, name="Threads"):
     async def thread_keep_alive(self, ctx: Context):
         if not isinstance(ctx.channel, Thread):
             return await ctx.send("to keep a thread alive, use this in a thread!")
-        keep_alive_threads = db.get_keep_alive_threads()
+        keep_alive_threads = database.get_keep_alive_threads()
         if ctx.channel.id not in keep_alive_threads:
-            db.add_keep_alive_thread(ctx.channel.id)
+            database.add_keep_alive_thread(ctx.channel.id)
             return await ctx.send("okay, i'll keep this thread alive for you :)! use this again in this "
                                   "channel if you want me to stop reviving this thread!")
-        db.remove_keep_alive_thread(ctx.channel.id)
+        database.remove_keep_alive_thread(ctx.channel.id)
         return await ctx.send("okay, i won't keep this thread alive anymore... hope it's okay on its own :(")
 
     @commands.Cog.listener()
     async def on_thread_update(self, before: Thread, after: Thread):
         if not before.archived and after.archived:  # when a thread archival happens
-            keep_alive_threads = db.get_keep_alive_threads()
+            keep_alive_threads = database.get_keep_alive_threads()
             if after.id in keep_alive_threads:
                 return await after.edit(archived=False)
 

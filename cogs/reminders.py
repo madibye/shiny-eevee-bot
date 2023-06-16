@@ -6,8 +6,8 @@ from discord.errors import Forbidden, HTTPException, NotFound
 from discord.ext import commands
 
 import config
-from helpers import db, scheduler, embedding
-from helpers.scheduler import ScheduledEvent, ScheduledEventType as SET
+from handlers import database, scheduler, embedding
+from handlers.scheduler import ScheduledEvent, ScheduledEventType as SET
 from main import Madi
 
 
@@ -53,7 +53,7 @@ class Reminders(commands.Cog, name="Reminders"):
     @commands.command(name="remindmecancel", aliases=["remindercancel", "rmc"])
     async def remindme_cancel(self, ctx):
         if ctx.message.reference:
-            reminder = scheduler.reminder_from_dict(self.bot, db.get_reminder_from_url(ctx.message.reference.jump_url))
+            reminder = scheduler.reminder_from_dict(self.bot, database.get_reminder_from_url(ctx.message.reference.jump_url))
             if reminder is not None:
                 if reminder.target.id == ctx.author.id:
                     if isinstance(reminder.extra_args, dict):
@@ -122,14 +122,14 @@ class Reminders(commands.Cog, name="Reminders"):
         if not custom_id.startswith("CRR"):
             return
         reminder_id = interaction.data["custom_id"].split()[1]
-        reminder = db.get_reminder(reminder_id)
+        reminder = database.get_reminder(reminder_id)
         if not reminder:
             return await interaction.response.send_message(
                 "I couldn't find any reminders here! Either this is an old reminder that already got cancelled, "
                 "or something else went wrong!", ephemeral=True)
         if interaction.user.id != reminder.get("target_id"):
             return await interaction.response.send_message("Hey, don't delete other people's reminders! That's mean!", ephemeral=True)
-        db.delete_reminder(reminder)
+        database.delete_reminder(reminder)
         await interaction.message.edit(view=scheduler.CancelReminderView(label="Cancelled", disabled=True))
         await interaction.response.send_message("Okie, I won't remind you about that, then!", ephemeral=True)
         await interaction.message.delete(delay=10)

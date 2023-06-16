@@ -14,6 +14,8 @@ class Madi(Bot):
         super().__init__(command_prefix=["!"], help_command=None, application_id=config.bot_application_id, intents=intents)
 
     async def setup_hook(self):
+        from config.live_config import lc  # Please don't worry about why this is here
+        lc.load()  # Anyways, let's also wait for the live config to load up before starting
         for extension in config.discord_cogs:
             try:
                 await bot.load_extension(extension)

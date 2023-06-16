@@ -7,8 +7,8 @@ from discord.ext import commands
 from discord.utils import MISSING
 
 import config
-from helpers import db
-from helpers.component_globals import *
+from handlers import database
+from handlers.component_globals import *
 from main import Madi
 
 
@@ -28,7 +28,7 @@ class Roles(commands.Cog, name="roles"):
     async def custom_role(self, interaction: Interaction, color: str | None = None, name: str | None = None, icon: str | None = None):
         if not name and not color and not icon:
             return await interaction.response.send_message(f"oh okay... but nothing changed :(", ephemeral=True)
-        custom_roles_db = db.get_custom_roles()
+        custom_roles_db = database.get_custom_roles()
         icon_file: bytes | None = None
         if icon:
             async with aiohttp.ClientSession() as session:
@@ -44,7 +44,7 @@ class Roles(commands.Cog, name="roles"):
             role = await self.guild.create_role(name=name)
             await role.edit(position=20)
             await interaction.user.add_roles(role)
-            db.edit_custom_role(str(interaction.user.id), role.id)
+            database.edit_custom_role(str(interaction.user.id), role.id)
         else:
             role = self.guild.get_role(custom_roles_db[str(interaction.user.id)])
             await interaction.user.add_roles(role)  # Make sure they have the role of course
@@ -62,7 +62,7 @@ class Roles(commands.Cog, name="roles"):
     async def set_custom_role(self, ctx: Context, user_id: int, role_id: int):
         if ctx.channel.id != 997571188727492749:
             return
-        db.edit_custom_role(str(user_id), role_id)
+        database.edit_custom_role(str(user_id), role_id)
         return await ctx.send(f"Set <@{user_id}>'s custom role to <@&{role_id}>!")
 
 

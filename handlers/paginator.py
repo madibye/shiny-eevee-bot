@@ -1,7 +1,7 @@
 from discord import Interaction, ButtonStyle
 from discord.ui import button
 
-from helpers.component_globals import ComponentBase, TIMEOUT
+from handlers.component_globals import ComponentBase, TIMEOUT
 
 
 class PaginatorButtons(ComponentBase):

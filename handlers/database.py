@@ -1,6 +1,7 @@
 from bson import ObjectId
 from pymongo import MongoClient
 from pymongo.database import Database, Collection
+from termcolor import cprint
 
 from config import *
 
@@ -11,6 +12,7 @@ db_threads: Collection = database.thread
 db_roles: Collection = database.roles
 db_role_pickers: Collection = database.role_pickers
 db_starboard: Collection = database.starboard
+db_config: Collection = database.config
 
 
 def add_reminder(data):
@@ -154,3 +156,38 @@ def get_starboard_db():
 
 def update_starboard_db(list_to_edit, new_ids):
     return db_starboard.update_one({"_id": "starboard_messages"}, {"$set": {list_to_edit: new_ids}})
+
+def create_config_value(config_id, default_value):
+    document = {"_id": config_id, "value": default_value}
+    cprint(f"Creating new db_config entry under \"{document['_id']}\" with value {document['value']}", "yellow")
+    db_config.insert_one(document)
+    return document
+
+def get_config_value(config_id, default_value):
+    document = db_config.find_one({"_id": str(config_id)})
+    if document is None:
+        document = create_config_value(config_id, default_value)
+    if not document:
+        cprint(f"Something went wrong when getting config value `{config_id}`!", "red")
+    return document["value"]
+
+def get_config_description(config_id):
+    document = db_config.find_one({"_id": str(config_id)})
+    if document:
+        return document.get("description")
+    return None
+
+def set_config_value(config_id, new_value):
+    """Do not call this method outside of live_config.set(). Desyncing with db would be sad."""
+    document = db_config.find_one({"_id": str(config_id)})
+    if document is None:
+        return db_config.insert_one({"_id": config_id, "value": new_value})
+    document["value"] = new_value
+    return db_config.replace_one({"_id": config_id}, document)
+
+def set_config_description(config_id, new_description: str):
+    document = db_config.find_one({"_id": str(config_id)})
+    if not document:
+        return
+    document["description"] = new_description
+    return db_config.replace_one({"_id": config_id}, document)
