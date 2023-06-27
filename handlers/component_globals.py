@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 from typing import List
 
-from discord import Interaction, Message, TextStyle, ButtonStyle
+from discord import Interaction, Message, TextStyle
 from discord.ext.commands import Context
-from discord.ui import View, Button, Select, Modal, TextInput, button
+from discord.ui import View, Button, Select, Modal, TextInput
 
 
 @dataclass

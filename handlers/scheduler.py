@@ -15,7 +15,7 @@ from termcolor import cprint
 import config
 from handlers import database
 from handlers.component_globals import ComponentBase
-from main import Madi
+from main import Amelia
 
 
 class SubError(Exception):
@@ -50,7 +50,7 @@ NEEDS_TARGET = [ScheduledEventType.REMINDER, ScheduledEventType.SUB, ScheduledEv
 
 class ScheduledEvent:
     def __init__(
-            self, bot: Madi, event_type: ScheduledEventType, timestamp: int, channel_id: int,
+            self, bot: Amelia, event_type: ScheduledEventType, timestamp: int, channel_id: int,
             target_id: int = 0, url: str = "", raw_data: dict | None = None, extra_args=None
     ):
         """
@@ -67,7 +67,7 @@ class ScheduledEvent:
                          Don't worry about setting this 99% of the time.
         :param extra_args: (Optional) Any extra information we need to pass our event.
         """
-        self.bot: Madi = bot
+        self.bot: Amelia = bot
         self.event_type: ScheduledEventType = event_type
         self.timestamp: int = timestamp
         self.guild: Guild = self.bot.get_guild(config.guild_id)
@@ -157,7 +157,7 @@ class ScheduledEvent:
 
 
 @tasks.loop(seconds=15)
-async def schedule_loop(bot: Madi):
+async def schedule_loop(bot: Amelia):
     current_ts = time.time()
     for reminder in [reminder_from_dict(bot, r) for r in database.get_all_reminders() if r.get("timestamp", 0) <= current_ts]:
         if (not reminder.channel) and reminder.target and reminder.event_type in [
@@ -175,7 +175,7 @@ async def schedule_loop(bot: Madi):
         reminder.remove_from_db()
 
 
-def reminder_from_dict(bot: Madi, data: dict) -> ScheduledEvent:
+def reminder_from_dict(bot: Amelia, data: dict) -> ScheduledEvent:
     try:
         event_type = ScheduledEventType(data.get("event_type", data.get("type")))
     except ValueError:
@@ -187,7 +187,7 @@ def reminder_from_dict(bot: Madi, data: dict) -> ScheduledEvent:
                           url=data.get("url", ""), raw_data=data, extra_args=data.get("extra_args", data.get("note")))
 
 
-async def scheduler_add(bot: Madi, ctx: Context, args, unsub=False) -> str:
+async def scheduler_add(bot: Amelia, ctx: Context, args, unsub=False) -> str:
     schedule_str = ""
     current_time = datetime.now(tz=tz.gettz("America/New_York"))
     total_delta = process_time_strings(current_time, list(args), False)
@@ -210,7 +210,7 @@ def info_from_channel(channel):
     }.get(channel.id, (None, None))
 
 
-async def sub(channel: TextChannel | Thread, bot: Madi, target_id: int, unsub: bool = False, ping: bool = True) -> str:
+async def sub(channel: TextChannel | Thread, bot: Amelia, target_id: int, unsub: bool = False, ping: bool = True) -> str:
     guild = bot.get_guild(config.guild_id)
     target = await guild.fetch_member(target_id)
     notif_role, msg_end = info_from_channel(channel)

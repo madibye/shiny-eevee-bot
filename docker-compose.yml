@@ -7,8 +7,8 @@ services:
       - mongo_data:/data/db
     restart: always
 
-  madi-the-koala:
-    container_name: "madi"
+  amelia-bot:
+    container_name: "amelia"
     build: .
     depends_on:
       - mongo

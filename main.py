@@ -9,7 +9,7 @@ import config
 intents = Intents.all()
 
 
-class Madi(Bot):
+class Amelia(Bot):
     def __init__(self):
         super().__init__(command_prefix=["!"], help_command=None, application_id=config.bot_application_id, intents=intents)
 
@@ -35,5 +35,5 @@ class Madi(Bot):
 
 
 if __name__ == "__main__":
-    bot = Madi()
+    bot = Amelia()
     bot.run(config.discord_token, log_level=40)

@@ -4,12 +4,12 @@ from discord.ext import commands
 import config
 from config.live_config import lc
 from handlers import database, embedding
-from main import Madi
+from main import Amelia
 
 
 class Admin(commands.Cog, name="admin"):
     def __init__(self, bot):
-        self.bot: Madi = bot
+        self.bot: Amelia = bot
         self.leadership_channel: TextChannel | None = None
         self.guild: Guild | None = None
 

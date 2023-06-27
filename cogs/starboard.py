@@ -8,7 +8,7 @@ import config
 from config.live_config import lc
 from handlers import database
 from handlers.component_globals import ComponentBase
-from main import Madi
+from main import Amelia
 
 
 class StarboardView(ComponentBase):
@@ -21,7 +21,7 @@ class StarboardView(ComponentBase):
 
 class Starboard(commands.Cog, name="Starboard"):
     def __init__(self, bot):
-        self.bot: Madi = bot
+        self.bot: Amelia = bot
         self.guild: Guild | None = None
         self.starboard_channel: TextChannel | None = None
         self.starboard_msg_queue: set = set()
