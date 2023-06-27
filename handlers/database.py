@@ -196,11 +196,11 @@ def set_user_timezone(user_id: int, timezone_str: str):
     document = db_config.find_one({"_id": "user_timezones"})
     if document is None:
         db_config.insert_one(document := {"_id": "user_timezones", "values": {}})
-    document["values"][user_id] = timezone_str
+    document["values"][str(user_id)] = timezone_str
     db_config.replace_one({"_id": "user_timezones"}, document)
 
 def get_user_timezone(user_id: int):
     document = db_config.find_one({"_id": "user_timezones"})
     if document is None:
         db_config.insert_one(document := {"_id": "user_timezones", "values": {}})
-    return document["values"].get(user_id, "America/New_York")
+    return document["values"].get(str(user_id), "America/New_York")
