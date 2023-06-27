@@ -35,7 +35,7 @@ class Reminders(commands.Cog, name="Reminders"):
             total_delta, note = scheduler.process_time_strings(current_time, time_and_note_list, True)
             new_time = current_time + total_delta
             if current_time < new_time:
-                msg = await ctx.send(f"Okie, I'll remind you at {new_time.strftime('%l:%M %p on %b %d, %Y')}! "
+                msg = await ctx.send(f"Okie, I'll remind you on <t:{new_time.timestamp()}:f>! "
                                      f"Feel free to press the button below if you'd like to cancel your reminder!".replace('  ', ' '),
                                      view=scheduler.CancelReminderView(label="Don't Remind", disabled=True))
                 # Now time to make the DB entry
