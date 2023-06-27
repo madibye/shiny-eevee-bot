@@ -31,7 +31,7 @@ class Reminders(commands.Cog, name="Reminders"):
                                   "Feel free to use the slash command `/remindme` instead if you'd like your reminder to be private!")
         if time_and_note:
             time_and_note_list = scheduler.remove_empty_items(time_and_note.replace("\n", " \n").split(" "))
-            timezone: tzinfo = tz.gettz(await database.get_user_timezone(ctx.author.id))
+            timezone: tzinfo = tz.gettz(database.get_user_timezone(ctx.author.id))
             current_time = datetime.now(tz=timezone)
             total_delta, note = scheduler.process_time_strings(current_time, time_and_note_list, timezone, True)
             new_time = current_time + total_delta
@@ -81,7 +81,7 @@ class Reminders(commands.Cog, name="Reminders"):
             await ctx.send("I think you entered an invalid timezone!! For best results, reference the timezone names "
                            "in the 2nd column on this page: https://www.zeitverschiebung.net/en/all-time-zones.html",
                            reference=ctx.message)
-        await database.set_user_timezone(ctx.author.id, timezone_str)
+        database.set_user_timezone(ctx.author.id, timezone_str)
         await ctx.send(f"Okie dokie, I've set `{timezone_str}` as your timezone! Feel free to use this command again "
                        f"if you'd like to change it!", reference=ctx.message)
 
@@ -90,7 +90,7 @@ class Reminders(commands.Cog, name="Reminders"):
                            note="A note for your reminder (e.g. \"Brush Teeth\", \"Do Homework\", etc.)",
                            repeat="If you want to schedule a repeating reminder, set how often you want it to repeat")
     async def remindme_slash(self, interaction: Interaction, time: str, note: str, repeat: str | None = None):
-        timezone: tzinfo = tz.gettz(await database.get_user_timezone(interaction.user.id))
+        timezone: tzinfo = tz.gettz(database.get_user_timezone(interaction.user.id))
         current_time = datetime.now(tz=timezone)
         total_delta = scheduler.process_time_strings(current_time, time.split(" "), timezone, False)
         new_time = current_time + total_delta

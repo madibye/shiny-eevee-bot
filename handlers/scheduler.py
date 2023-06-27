@@ -189,7 +189,7 @@ def reminder_from_dict(bot: Amelia, data: dict) -> ScheduledEvent:
 
 async def scheduler_add(bot: Amelia, ctx: Context, args, unsub=False) -> str:
     schedule_str = ""
-    timezone: tzinfo = tz.gettz(await database.get_user_timezone(ctx.author.id))
+    timezone: tzinfo = tz.gettz(database.get_user_timezone(ctx.author.id))
     current_time = datetime.now(tz=timezone)
     total_delta = process_time_strings(current_time, list(args), timezone, False)
     new_time = current_time + total_delta
