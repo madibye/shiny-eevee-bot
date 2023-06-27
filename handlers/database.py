@@ -191,3 +191,16 @@ def set_config_description(config_id, new_description: str):
         return
     document["description"] = new_description
     return db_config.replace_one({"_id": config_id}, document)
+
+def set_user_timezone(user_id: int, timezone_str: str):
+    document = db_config.find_one({"_id": "user_timezones"})
+    if document is None:
+        db_config.insert_one(document := {"_id": "user_timezones", "values": {}})
+    document["values"][user_id] = timezone_str
+    db_config.replace_one({"_id": "user_timezones"}, document)
+
+def get_user_timezone(user_id: int):
+    document = db_config.find_one({"_id": "user_timezones"})
+    if document is None:
+        db_config.insert_one(document := {"_id": "user_timezones", "values": {}})
+    return document["values"].get(user_id, "America/New_York")

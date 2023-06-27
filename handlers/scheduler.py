@@ -1,6 +1,6 @@
 import re
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, tzinfo
 from enum import Enum
 
 from dateutil import tz
@@ -140,7 +140,7 @@ class ScheduledEvent:
         try:
             msg = await self.target.send(f"Hey there, {edited_note}", view=CancelReminderView(disabled=True))
             reminder = ScheduledEvent(bot=self.bot, event_type=ScheduledEventType.REPEATING_REMINDER, target_id=self.target.id,
-                                      timestamp=round((datetime.now(tz=tz.gettz("America/New_York")) + timedelta(seconds=repeat_delta)).timestamp()),
+                                      timestamp=round((datetime.now() + timedelta(seconds=repeat_delta)).timestamp()),
                                       channel_id=self.channel.id, extra_args={'note': note, 'repeat': repeat_delta, 'prev_id': msg.id})
             reminder_id = reminder.add_to_db()
             await msg.edit(view=CancelReminderView(reminder_id))
@@ -189,8 +189,9 @@ def reminder_from_dict(bot: Amelia, data: dict) -> ScheduledEvent:
 
 async def scheduler_add(bot: Amelia, ctx: Context, args, unsub=False) -> str:
     schedule_str = ""
-    current_time = datetime.now(tz=tz.gettz("America/New_York"))
-    total_delta = process_time_strings(current_time, list(args), False)
+    timezone: tzinfo = tz.gettz(await database.get_user_timezone(ctx.author.id))
+    current_time = datetime.now(tz=timezone)
+    total_delta = process_time_strings(current_time, list(args), timezone, False)
     new_time = current_time + total_delta
     if new_time != current_time:
         schedule_str = f" You will be {'un' if unsub else 're-'}subscribed at {new_time.strftime('%l:%M %p on %b %d, %Y')}.".replace(
@@ -289,8 +290,9 @@ def process_note(nstrings: list[str], i: int) -> list[str]:
     return nstrings
 
 
-def process_time_strings(now: datetime, tstrings: list[str], return_note: bool = False) -> tuple[
-                                                                                               timedelta, str] | timedelta:
+def process_time_strings(
+        now: datetime, tstrings: list[str], timezone: tzinfo, return_note: bool = False
+) -> tuple[timedelta, str] | timedelta:
     """
     processes a list of strings/arguments, adds up all recognizable times in them, and returns a timedelta object.
     if return_note is true, we'll also return a string with the times parsed out.
@@ -325,8 +327,7 @@ def process_time_strings(now: datetime, tstrings: list[str], return_note: bool =
     for i in range(len(exp_tstrs)):
         # build our string we're attempting to parse
         time_string = exp_tstrs[i]
-        dt, parse_status = a.parseDT(datetimeString=time_string, sourceTime=now,
-                                     tzinfo=tz.gettz("America/New_York"))
+        dt, parse_status = a.parseDT(datetimeString=time_string, sourceTime=now, tzinfo=timezone)
 
         # if what we have is parsable..
         if parse_status:

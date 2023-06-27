@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, tzinfo
 
 from dateutil import tz
 from discord import Guild, DMChannel, Interaction, Object, app_commands
@@ -31,8 +31,9 @@ class Reminders(commands.Cog, name="Reminders"):
                                   "Feel free to use the slash command `/remindme` instead if you'd like your reminder to be private!")
         if time_and_note:
             time_and_note_list = scheduler.remove_empty_items(time_and_note.replace("\n", " \n").split(" "))
-            current_time = datetime.now(tz=tz.gettz("America/New_York"))
-            total_delta, note = scheduler.process_time_strings(current_time, time_and_note_list, True)
+            timezone: tzinfo = tz.gettz(await database.get_user_timezone(ctx.author.id))
+            current_time = datetime.now(tz=timezone)
+            total_delta, note = scheduler.process_time_strings(current_time, time_and_note_list, timezone, True)
             new_time = current_time + total_delta
             if current_time < new_time:
                 msg = await ctx.send(f"Okie, I'll remind you on <t:{int(new_time.timestamp())}:f>! "
@@ -74,17 +75,28 @@ class Reminders(commands.Cog, name="Reminders"):
         else:
             await ctx.send("To cancel a reminder, you need to reply to a message containing a reminder!")
 
+    @commands.command(name="settimezone", aliases=["stz"])
+    async def set_timezone(self, ctx, timezone_str):
+        if not tz.gettz(timezone_str):
+            await ctx.send("I think you entered an invalid timezone!! For best results, reference the timezone names "
+                           "in the 2nd column on this page: https://www.zeitverschiebung.net/en/all-time-zones.html",
+                           reference=ctx.message)
+        await database.set_user_timezone(ctx.author.id, timezone_str)
+        await ctx.send(f"Okie dokie, I've set `{timezone_str}` as your timezone! Feel free to use this command again "
+                       f"if you'd like to change it!", reference=ctx.message)
+
     @app_commands.command(name="remindme", description="Need a reminder set? I'll be happy to help!")
     @app_commands.describe(time=f"The time you'd like me to remind you (e.g. \"2h\", \"10pm\", \"5/24 6:30pm\")",
                            note="A note for your reminder (e.g. \"Brush Teeth\", \"Do Homework\", etc.)",
                            repeat="If you want to schedule a repeating reminder, set how often you want it to repeat")
     async def remindme_slash(self, interaction: Interaction, time: str, note: str, repeat: str | None = None):
-        current_time = datetime.now(tz=tz.gettz("America/New_York"))
-        total_delta = scheduler.process_time_strings(current_time, time.split(" "), False)
+        timezone: tzinfo = tz.gettz(await database.get_user_timezone(interaction.user.id))
+        current_time = datetime.now(tz=timezone)
+        total_delta = scheduler.process_time_strings(current_time, time.split(" "), timezone, False)
         new_time = current_time + total_delta
         repeat_delta: timedelta = timedelta()
         if repeat:
-            repeat_delta = scheduler.process_time_strings(current_time, repeat.split(" "), False)
+            repeat_delta = scheduler.process_time_strings(current_time, repeat.split(" "), timezone, False)
             if repeat_delta.total_seconds() < 59:
                 return await interaction.response.send_message(
                     "Sorry, I can't set a reminder with a repeat duration of under 60 seconds!" if repeat_delta.total_seconds() else
@@ -92,7 +104,7 @@ class Reminders(commands.Cog, name="Reminders"):
         if current_time < new_time:
             try:
                 msg = await interaction.user.send(
-                    content=f"Hi there! At {new_time.strftime('%l:%M %p on %b %d, %Y')}, you'll be reminded about: `{note}`! "
+                    content=f"Hi there! At <t:{int(new_time.timestamp())}:f>, you'll be reminded about: `{note}`! "
                     f"{f'Afterward, you will be reminded every {embedding.get_time_remaining_str(repeat_delta)}. ' if repeat else ''}"
                     f"Feel free to press the button below if you'd like to cancel your reminder!".replace('  ', ' '),
                     view=scheduler.CancelReminderView(label="Stop Reminding" if repeat else "Don't Remind", disabled=True))
