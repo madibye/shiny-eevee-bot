@@ -80,7 +80,7 @@ class Reminders(commands.Cog, name="Reminders"):
         timezone_str = timezone_str.replace(" ", "_")
         if not tz.gettz(timezone_str):
             return await ctx.send("I think you entered an invalid timezone!! For best results, reference the timezone names "
-                           "in the 2nd column on this page: https://www.zeitverschiebung.net/en/all-time-zones.html",
+                           "in the 2nd column on this page (e.g. `America/New_York`): https://www.zeitverschiebung.net/en/all-time-zones.html",
                            reference=ctx.message)
         database.set_user_timezone(ctx.author.id, timezone_str)
         await ctx.send(f"Okie dokie, I've {f'set `{timezone_str}` as your timezone' if timezone_str != 'America/New_York' else f'returned your timezone to the default of `{timezone_str}`'}"
