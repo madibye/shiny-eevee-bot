@@ -1,6 +1,6 @@
 import random
 
-from discord import Object, Embed, File
+from discord import Object, Embed
 from discord.ext.commands import Context, Cog, command
 
 import config
@@ -48,11 +48,11 @@ class Fun(Cog, name="Fun"):
         await ctx.send(f"I've decided, you should pick **{answers_str}**!")
 
     @command(name="biglist")
-    async def big_list(self, ctx: Context):
+    async def big_list(self, ctx: Context, side_count: int, type_count: int):
         if ctx.author.id != 188875600373481472:
             return
         await ctx.send("Okie, I'll go ahead and start working on that!! I'll letcha know when I'm all finished up :)")
-        files = generate_type_loops(3, 1)
+        files = generate_type_loops(side_count, type_count)
         await ctx.send("I'm done!! Here you go :)", files=files)
 
     @command(name="weakness", aliases=["weak", "w"])
