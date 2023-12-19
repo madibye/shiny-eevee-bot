@@ -2,6 +2,7 @@ from enum import StrEnum, auto
 from itertools import permutations, combinations, combinations_with_replacement
 from numpy import prod
 from datetime import datetime
+from time import sleep
 
 from discord import File
 
@@ -73,6 +74,7 @@ def generate_type_loops(side_count: int = 3, type_count: int = 2):
                     i += 1
                     if i % 50000 == 0:
                         print(f"I'm {round(i/50000)}% of the way there... I think!?!")
+                    sleep(0.025)
                     break
         type_loop_file.seek(0)
         perfect_loop_file.seek(0)
