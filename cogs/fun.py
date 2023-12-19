@@ -5,7 +5,7 @@ from discord.ext.commands import Context, Cog, command
 
 import config
 from handlers import command_helpers
-from handlers.type_matchups import PTN
+from handlers.type_matchups import PokeType, generate_type_loops
 
 
 class Fun(Cog, name="Fun"):
@@ -47,14 +47,22 @@ class Fun(Cog, name="Fun"):
             answers_str = ', '.join(answers)
         await ctx.send(f"I've decided, you should pick **{answers_str}**!")
 
+    @command(name="biglist")
+    async def big_list(self, ctx: Context):
+        if ctx.author.id != 188875600373481472:
+            return
+        await ctx.send("Okie, I'll go ahead and start working on that!! I'll letcha know when I'm all finished up :)")
+        generate_type_loops(3, 2)
+        await ctx.send("I'm done!!")
+
     @command(name="weakness", aliases=["weak", "w"])
     async def weakness(self, ctx: Context):
-        type_input: list[PTN] = [PTN[t.capitalize()] for t in command_helpers.remove_empty_items(
+        type_input: list[PokeType] = [PokeType[t.capitalize()] for t in command_helpers.remove_empty_items(
             " ".join(command_helpers.parse_args(ctx)).replace("/", " ").lower().split(" "))]
-        types = [t for i, t in enumerate(type_input) if (t not in type_input[:i]) and (t in PTN)]
+        types = [t for i, t in enumerate(type_input) if (t not in type_input[:i]) and (t in PokeType)]
         if not types:
             return await ctx.send("looks like there's something wrong with the list of types you gave me...")
-        matchups: dict[PTN, int] = {_type: 1 for _type in PTN}
+        matchups: dict[PokeType, int] = {_type: 1 for _type in PokeType}
         for t in types:
             for mult, mult_types in t.get_type_matchups().items():
                 for mult_type in mult_types:
