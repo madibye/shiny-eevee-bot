@@ -5,3 +5,4 @@ python-dateutil==2.8.2
 pymongo==4.4.0
 parsedatetime==2.6
 aiohttp==3.8.4
+numpy==1.26.2
