@@ -1,6 +1,6 @@
 import random
 
-from discord import Object, Embed
+from discord import Object, Embed, File
 from discord.ext.commands import Context, Cog, command
 
 import config
@@ -53,7 +53,7 @@ class Fun(Cog, name="Fun"):
             return
         await ctx.send("Okie, I'll go ahead and start working on that!! I'll letcha know when I'm all finished up :)")
         files = generate_type_loops(3, 1)
-        await ctx.send("I'm done!! Here you go :)", files=files)
+        await ctx.send("I'm done!! Here you go :)", files=[File(f) for f in files])
 
     @command(name="weakness", aliases=["weak", "w"])
     async def weakness(self, ctx: Context):
