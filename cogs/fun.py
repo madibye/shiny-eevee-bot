@@ -77,3 +77,4 @@ class Fun(Cog, name="Fun"):
         return await ctx.send(embed=embed)
 
 async def setup(client):
+    await client.add_cog(Fun(client), guild=Object(id=config.guild_id))
