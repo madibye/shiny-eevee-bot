@@ -52,7 +52,8 @@ class Fun(Cog, name="Fun"):
         if ctx.author.id != 188875600373481472:
             return
         await ctx.send("Okie, I'll go ahead and start working on that!! I'll letcha know when I'm all finished up :)")
-        await ctx.send("I'm done!!")
+        files = generate_type_loops(3, 1)
+        await ctx.send("I'm done!! Here you go :)", files=files)
 
     @command(name="weakness", aliases=["weak", "w"])
     async def weakness(self, ctx: Context):
