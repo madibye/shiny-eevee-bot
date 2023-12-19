@@ -75,7 +75,7 @@ def generate_type_loops(side_count: int = 3, type_count: int = 2):
         i += 1
         if i % 50000 == 0:
             print(f"I'm {round(i/50000)}% of the way there... I think!?!")
-    type_loop_file.close(), perfect_loop_file.close()
+    return type_loop_file, perfect_loop_file
 
 
 if __name__ == "__main__":

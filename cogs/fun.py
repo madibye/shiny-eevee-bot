@@ -52,7 +52,6 @@ class Fun(Cog, name="Fun"):
         if ctx.author.id != 188875600373481472:
             return
         await ctx.send("Okie, I'll go ahead and start working on that!! I'll letcha know when I'm all finished up :)")
-        generate_type_loops(3, 2)
         await ctx.send("I'm done!!")
 
     @command(name="weakness", aliases=["weak", "w"])
@@ -77,4 +76,3 @@ class Fun(Cog, name="Fun"):
         return await ctx.send(embed=embed)
 
 async def setup(client):
-    await client.add_cog(Fun(client), guild=Object(id=config.guild_id))
