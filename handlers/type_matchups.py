@@ -1,5 +1,5 @@
 from enum import StrEnum, auto
-from itertools import product, combinations
+from itertools import permutations, combinations, combinations_with_replacement
 from numpy import prod
 from datetime import datetime
 
@@ -58,24 +58,22 @@ def generate_type_loops(side_count: int = 3, type_count: int = 2):
     def get_type_matchup(ats: set[PokeType], dts: set[PokeType]):
         number = max({at: prod([dt.get_defensive_type_matchup(at) for dt in dts]) for at in ats}.values())
         return int(number) if number >= 1 else number
-
-    valid_loops = []
     i = 0
     with open('type_loops.txt', 'w') as type_loop_file, open('perfect_loops.txt', 'w') as perfect_loop_file:
-        for combo in product([set(t) for n in range(type_count) for t in combinations(PokeType, n+1)], repeat=side_count):
-            if (all(c not in valid_loops for c in product(combo, repeat=side_count)) and
-                    all(get_type_matchup(combo[n-1], combo[n]) > 1 for n in range(len(combo)))):
-                valid_loops.append(combo)
-                write_str = ''.join(f"{'/'.join(combo[n]).title()} -> " for n in range(len(combo)-1)) + \
-                            '/'.join(combo[-1]).title()
-                if (all(get_type_matchup(combo[n - 1], combo[n]) == get_type_matchup(combo[-1], combo[0]) for n in range(len(combo)))
-                        and all(get_type_matchup(combo[n], combo[n - 1]) == get_type_matchup(combo[0], combo[-1]) for n in range(len(combo)))):
-                    perfect_loop_file.writelines((write_str := write_str + f" (<- {get_type_matchup(combo[0], combo[-1])}x | {get_type_matchup(combo[-1], combo[0])}x ->)") + '\n')
-                    write_str = '[!!] ' + write_str
-                type_loop_file.writelines(write_str + '\n')
-            i += 1
-            if i % 50000 == 0:
-                print(f"I'm {round(i/50000)}% of the way there... I think!?!")
+        for possible_combo in combinations_with_replacement([set(t) for n in range(type_count) for t in combinations(PokeType, n+1)], side_count):
+            for combo in permutations(possible_combo, len(possible_combo)):
+                if all(get_type_matchup(combo[n-1], combo[n]) > 1 for n in range(len(combo))):
+                    write_str = ''.join(f"{'/'.join(combo[n]).title()} -> " for n in range(len(combo)-1)) + \
+                                '/'.join(combo[-1]).title()
+                    if (all(get_type_matchup(combo[n - 1], combo[n]) == get_type_matchup(combo[-1], combo[0]) for n in range(len(combo)))
+                            and all(get_type_matchup(combo[n], combo[n - 1]) == get_type_matchup(combo[0], combo[-1]) for n in range(len(combo)))):
+                        perfect_loop_file.writelines((write_str := write_str + f" (<- {get_type_matchup(combo[0], combo[-1])}x | {get_type_matchup(combo[-1], combo[0])}x ->)") + '\n')
+                        write_str = '[!!] ' + write_str
+                    type_loop_file.writelines(write_str + '\n')
+                    i += 1
+                    if i % 50000 == 0:
+                        print(f"I'm {round(i/50000)}% of the way there... I think!?!")
+                    break
         type_loop_file.seek(0)
         perfect_loop_file.seek(0)
         return File('./type_loops.txt'), File('./perfect_loops.txt')
