@@ -36,7 +36,7 @@ class Roles(commands.Cog, name="roles"):
         await self.configure_custom_role(interaction, color, name, icon)
 
     @commands.command(name="setcustomrole", aliases=["scr"])
-    @commands.has_role("alpha koala")
+    @commands.has_any_role(config.admin_roles)
     async def set_custom_role(self, ctx: Context, user_id: int, role_id: int):
         if ctx.channel.id != 997571188727492749:
             return
@@ -81,7 +81,7 @@ class Roles(commands.Cog, name="roles"):
         await self.configure_custom_role(custom_role_modal.interaction, *component_data.value)
 
     @commands.command(name="refreshcustomroleembed", aliases=["rcre"])
-    @commands.has_role("alpha koala")
+    @commands.has_any_role(config.admin_roles)
     async def refresh_custom_role_embed(self, ctx: Context):
         if ctx.channel.id != 997571188727492749:
             return
