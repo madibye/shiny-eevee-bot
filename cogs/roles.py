@@ -1,7 +1,7 @@
 import sys
 
 import aiohttp
-from discord import Guild, app_commands, Object, TextChannel, Embed
+from discord import Guild, app_commands, TextChannel, Embed, ButtonStyle
 from discord.errors import Forbidden, HTTPException
 from discord.ext import commands
 from discord.utils import MISSING
@@ -25,8 +25,8 @@ class Roles(commands.Cog, name="roles"):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        self.guild = self.bot.get_guild(config.guild_id)
-        self.roles_channel = await self.guild.fetch_channel(config.roles_channel)
+        self.guild = self.bot.get_guild(config.koala_city_id)
+        self.roles_channel = await self.bot.fetch_channel(config.roles_channel)
 
     @app_commands.command(name="customrole", description="set your own custom role color with this nice little slash command :)")
     @app_commands.describe(color="the hex color for your role. you can leave out the # if you like. set to 0 to clear color!",
@@ -138,4 +138,4 @@ class Roles(commands.Cog, name="roles"):
 
 
 async def setup(client):
-    await client.add_cog(Roles(client), guild=Object(id=config.guild_id))
+    await client.add_cog(Roles(client), guilds=client.guilds)

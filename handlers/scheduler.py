@@ -70,10 +70,10 @@ class ScheduledEvent:
         self.bot: Amelia = bot
         self.event_type: ScheduledEventType = event_type
         self.timestamp: int = timestamp
-        self.guild: Guild = self.bot.get_guild(config.guild_id)
         self.target: User | None = self.bot.get_user(target_id) if target_id else None
         self.channel: ForumChannel | TextChannel | CategoryChannel | Thread | DMChannel = self.bot.get_channel(
             channel_id)
+        self.guild: Guild = self.channel.guild
         self.url: str = url
         self.extra_args = extra_args
         self.raw_data: dict = raw_data if raw_data else self.__dict__()
@@ -212,7 +212,7 @@ def info_from_channel(channel):
 
 
 async def sub(channel: TextChannel | Thread, bot: Amelia, target_id: int, unsub: bool = False, ping: bool = True) -> str:
-    guild = bot.get_guild(config.guild_id)
+    guild = bot.get_guild(config.koala_city_id)
     target = await guild.fetch_member(target_id)
     notif_role, msg_end = info_from_channel(channel)
     if not notif_role:

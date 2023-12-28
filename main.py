@@ -23,15 +23,13 @@ class Amelia(Bot):
             except Exception as error:
                 traceback.print_exc()
                 cprint(f"Cog {extension} could not be loaded for reason: {error}", "red")
-        await bot.tree.sync(guild=Object(id=config.guild_id))  # Sync our slash commands
+        for _id in [guild.id for guild in bot.guilds]:
+            await bot.tree.sync(guild=Object(id=_id))  # Sync our slash commands
 
     @staticmethod
     async def on_ready():
         cprint(f"I've logged in as {bot.user.name}. I'm ready to go!", "green")
         await bot.change_presence(activity=Game(name="hiiiiiii :)"))
-        for guild in bot.guilds:
-            if guild.id != config.guild_id:
-                await guild.leave()
 
 
 if __name__ == "__main__":

@@ -30,4 +30,4 @@ class Threads(commands.Cog, name="Threads"):
 
 
 async def setup(client):
-    await client.add_cog(Threads(client))
+    await client.add_cog(Threads(client), guilds=client.guilds)

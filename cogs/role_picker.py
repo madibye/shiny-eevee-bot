@@ -1,6 +1,6 @@
 import math
 
-from discord import Guild, Embed, Interaction, ButtonStyle
+from discord import Embed, Interaction, ButtonStyle
 from discord.errors import NotFound
 from discord.ext import commands
 from discord.ext.commands.context import Context
@@ -33,11 +33,6 @@ class RoleButtons(ComponentBase):
 class RolePicker(commands.Cog, name="role_picker"):
     def __init__(self, bot):
         self.bot: Amelia = bot
-        self.guild: Guild | None = None
-
-    @commands.Cog.listener()
-    async def on_ready(self):
-        self.guild = self.bot.get_guild(guild_id)
 
     @commands.has_role(991519471686668358)
     @commands.command(name="refresh", aliases=["rpr"])
@@ -103,7 +98,7 @@ class RolePicker(commands.Cog, name="role_picker"):
         if value in ['channel_id', 'channel', 'ch', 'c']:
             if not args.isnumeric():
                 return await ctx.send(f"Couldn't change to channel {args}: In order to change the channel of a role picker, you need to input a valid channel ID!", reference=ctx.message)
-            if int(args) not in [channel.id for channel in self.guild.channels]:
+            if int(args) not in [channel.id for channel in ctx.guild.channels]:
                 return await ctx.send(f"Couldn't change to channel {args}: This channel ID isn't a channel in this server!", reference=ctx.message)
             role_picker_list[key].channel_id = int(args)
             database.set_role_picker_db(role_picker_list)
@@ -122,7 +117,7 @@ class RolePicker(commands.Cog, name="role_picker"):
                 if not role.isnumeric():
                     await ctx.send(f"Couldn't {'add' if args.startswith('a') else 'remove'} role {role}: In order to edit the roles of a role picker, you need to input a valid role ID!")
                     continue
-                if int(role) not in [r.id for r in self.guild.roles]:
+                if int(role) not in [r.id for r in ctx.guild.roles]:
                     await ctx.send(f"Couldn't {'add' if args.startswith('a') else 'remove'} role {role}: This role ID isn't a role in this server!")
                     continue
                 if args.startswith('a'):
@@ -214,7 +209,7 @@ class RolePicker(commands.Cog, name="role_picker"):
 
         buttons = []
         for role_id in role_picker_info.role_ids:
-            role = self.guild.get_role(role_id)
+            role = channel.guild.get_role(role_id)
             buttons.append((role.name, role.id))
 
         return await channel.send(embed=embed, view=RoleButtons(buttons, role_picker_info.max_row_length))
@@ -222,7 +217,7 @@ class RolePicker(commands.Cog, name="role_picker"):
     async def delete_role_picker(self, role_picker_info: RolePickerInfo):
         try:
             if role_picker_info.message_data['channel_id'] and role_picker_info.message_data['message_id']:
-                channel = await self.guild.fetch_channel(role_picker_info.message_data['channel_id'])
+                channel = await self.bot.fetch_channel(role_picker_info.message_data['channel_id'])
                 message = await channel.fetch_message(role_picker_info.message_data['message_id'])
                 await message.delete()
         except NotFound:  # The message got deleted beforehand :(
@@ -251,4 +246,4 @@ class RolePicker(commands.Cog, name="role_picker"):
             )
 
 async def setup(client):
-    await client.add_cog(RolePicker(client))
+    await client.add_cog(RolePicker(client), guilds=client.guilds)

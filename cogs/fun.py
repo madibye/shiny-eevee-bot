@@ -1,6 +1,6 @@
 import random
 
-from discord import Object, Embed
+from discord import Embed
 from discord.ext.commands import Context, Cog, command
 
 import config
@@ -77,4 +77,4 @@ class Fun(Cog, name="Fun"):
         return await ctx.send(embed=embed)
 
 async def setup(client):
-    await client.add_cog(Fun(client), guild=Object(id=config.guild_id))
+    await client.add_cog(Fun(client), guilds=client.guilds)

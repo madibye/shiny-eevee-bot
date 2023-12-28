@@ -1,4 +1,4 @@
-from discord import Guild, Interaction, Object, app_commands, TextChannel, Thread
+from discord import Interaction, app_commands, TextChannel, Thread
 from discord.ext import commands
 
 import config
@@ -9,17 +9,15 @@ from main import Amelia
 class Notifications(commands.Cog, name="notifications"):
     def __init__(self, bot):
         self.bot: Amelia = bot
-        self.guild: Guild | None = None
         self.ccgse_channel: TextChannel | None = None
         self.club_channel: Thread | None = None
         self.minecraft_channel: TextChannel | None = None
 
     @commands.Cog.listener()
     async def on_ready(self):
-        self.guild: Guild = self.bot.get_guild(config.guild_id)
-        self.ccgse_channel: TextChannel | None = self.guild.get_channel(config.ccgse_channel)
-        self.club_channel: Thread | None = self.guild.get_channel(config.club_channel)
-        self.minecraft_channel: TextChannel | None = self.guild.get_channel(config.minecraft_channel)
+        self.ccgse_channel: TextChannel | None = self.bot.get_channel(config.ccgse_channel)
+        self.club_channel: Thread | None = self.bot.get_channel(config.club_channel)
+        self.minecraft_channel: TextChannel | None = self.bot.get_channel(config.minecraft_channel)
 
     # yes he is naked. please don't make fun of him :(
     sub_command_group = app_commands.Group(name="sub", description="Receive notifications for various things in the server!")
@@ -76,4 +74,4 @@ class Notifications(commands.Cog, name="notifications"):
 
 
 async def setup(client):
-    await client.add_cog(Notifications(client), guild=Object(id=config.guild_id))
+    await client.add_cog(Notifications(client), guilds=client.guilds)

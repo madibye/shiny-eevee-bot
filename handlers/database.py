@@ -179,14 +179,14 @@ def get_config_description(config_id):
 
 def set_config_value(config_id, new_value):
     """Do not call this method outside of live_config.set(). Desyncing with db would be sad."""
-    document = db_config.find_one({"_id": str(config_id)})
+    document: dict = db_config.find_one({"_id": str(config_id)})
     if document is None:
         return db_config.insert_one({"_id": config_id, "value": new_value})
     document["value"] = new_value
     return db_config.replace_one({"_id": config_id}, document)
 
 def set_config_description(config_id, new_description: str):
-    document = db_config.find_one({"_id": str(config_id)})
+    document: dict = db_config.find_one({"_id": str(config_id)})
     if not document:
         return
     document["description"] = new_description

@@ -73,5 +73,6 @@ class ModularModal(Modal):
         self.interaction = interaction
         self.stop()
 
+
 # Useful values
 TIMEOUT = 180

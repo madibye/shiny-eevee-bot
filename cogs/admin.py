@@ -1,4 +1,4 @@
-from discord import Guild, TextChannel
+from discord import TextChannel
 from discord.ext import commands
 
 import config
@@ -11,11 +11,6 @@ class Admin(commands.Cog, name="admin"):
     def __init__(self, bot):
         self.bot: Amelia = bot
         self.leadership_channel: TextChannel | None = None
-        self.guild: Guild | None = None
-
-    @commands.Cog.listener()
-    async def on_ready(self):
-        self.guild = self.bot.get_guild(config.guild_id)
 
     @commands.has_role("alpha koala")
     @commands.command(name="viewconfig", aliases=["vc"])
@@ -49,11 +44,11 @@ class Admin(commands.Cog, name="admin"):
             )
         attr = getattr(lc, key)
         try:
-            if type(attr) == int:
+            if isinstance(attr, int):
                 new_value = int(new_value)
-            elif type(attr) == float:
+            elif isinstance(attr, float):
                 new_value = float(new_value)
-            elif type(attr) == bool:
+            elif isinstance(attr, bool):
                 new_value = new_value in ['true', 'True', 't', 'T', '1', 'yes', 'Yes', 'YES']
         except ValueError:
             await ctx.message.add_reaction("❌")
@@ -81,5 +76,5 @@ class Admin(commands.Cog, name="admin"):
         await ctx.message.add_reaction("✅")
 
 
-async def setup(client):
-    await client.add_cog(Admin(client))
+async def setup(client: Amelia):
+    await client.add_cog(Admin(client), guilds=client.guilds)

@@ -40,4 +40,5 @@ class LiveConfig:
             setattr(self, name, value)
         database.set_config_value(name, getattr(self, name))
 
+
 lc = LiveConfig()

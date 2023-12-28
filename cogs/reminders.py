@@ -1,11 +1,10 @@
 from datetime import datetime, timedelta, tzinfo
 
 from dateutil import tz
-from discord import Guild, DMChannel, Interaction, Object, app_commands
+from discord import DMChannel, Interaction, app_commands
 from discord.errors import Forbidden, HTTPException, NotFound
 from discord.ext import commands
 
-import config
 from handlers import database, scheduler, embedding
 from handlers.scheduler import ScheduledEvent, ScheduledEventType as SET
 from main import Amelia
@@ -14,11 +13,9 @@ from main import Amelia
 class Reminders(commands.Cog, name="Reminders"):
     def __init__(self, bot):
         self.bot: Amelia = bot
-        self.guild: Guild | None = None
 
     @commands.Cog.listener()
     async def on_ready(self):
-        self.guild = self.bot.get_guild(config.guild_id)
         try:
             scheduler.schedule_loop.start(self.bot)
         except RuntimeError:
@@ -79,9 +76,10 @@ class Reminders(commands.Cog, name="Reminders"):
     async def set_timezone(self, ctx, *, timezone_str="America/New_York"):
         timezone_str = timezone_str.replace(" ", "_")
         if not tz.gettz(timezone_str):
-            return await ctx.send("I think you entered an invalid timezone!! For best results, reference the timezone names "
-                           "in the 2nd column on this page (e.g. `America/New_York`): https://www.zeitverschiebung.net/en/all-time-zones.html",
-                           reference=ctx.message)
+            return await ctx.send(
+                "I think you entered an invalid timezone!! For best results, reference the timezone names "
+                "in the 2nd column on this page (e.g. `America/New_York`): https://www.zeitverschiebung.net/en/all-time-zones.html",
+                reference=ctx.message)
         database.set_user_timezone(ctx.author.id, timezone_str)
         await ctx.send(f"Okie dokie, I've {f'set `{timezone_str}` as your timezone' if timezone_str != 'America/New_York' else f'returned your timezone to the default of `{timezone_str}`'}"
                        f"! Feel free to use this command again if you'd like to change it!", reference=ctx.message)
@@ -149,4 +147,4 @@ class Reminders(commands.Cog, name="Reminders"):
 
 
 async def setup(client):
-    await client.add_cog(Reminders(client), guild=Object(id=config.guild_id))
+    await client.add_cog(Reminders(client), guilds=client.guilds)

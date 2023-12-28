@@ -1,6 +1,6 @@
 from termcolor import cprint
 
-from discord import Guild, TextChannel, RawReactionActionEvent, utils, Message, File, Interaction, Embed, Colour, Thread
+from discord import TextChannel, RawReactionActionEvent, utils, Message, File, Interaction, Embed, Colour, Thread
 from discord.errors import NotFound, Forbidden, HTTPException, InvalidData
 from discord.ext import commands, tasks
 
@@ -22,7 +22,6 @@ class StarboardView(ComponentBase):
 class Starboard(commands.Cog, name="Starboard"):
     def __init__(self, bot):
         self.bot: Amelia = bot
-        self.guild: Guild | None = None
         self.starboard_channel: TextChannel | None = None
         self.starboard_msg_queue: set = set()
         self.starboarded_messages: list = []
@@ -30,8 +29,8 @@ class Starboard(commands.Cog, name="Starboard"):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        self.guild: Guild = self.bot.get_guild(config.guild_id)
-        self.starboard_channel: TextChannel = self.guild.get_channel(config.starboard_channel)
+        self.bot.get_channel(config.starboard_channel)
+        self.starboard_channel: TextChannel = self.bot.get_channel(config.starboard_channel)
 
         if starboard_db := database.get_starboard_db():
             self.starboarded_messages = starboard_db["message_ids"]
@@ -48,7 +47,7 @@ class Starboard(commands.Cog, name="Starboard"):
     async def starboard_check_loop(self):
         for ch_id, msg_id in self.starboard_msg_queue:
             try:
-                channel = await self.guild.fetch_channel(ch_id)
+                channel = await self.bot.fetch_channel(ch_id)
                 message = await channel.fetch_message(msg_id)
                 await self.post_starboard_msg(message)
                 self.starboarded_messages.append(msg_id)
@@ -60,7 +59,7 @@ class Starboard(commands.Cog, name="Starboard"):
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload: RawReactionActionEvent):
         try:
-            channel: Thread = await self.guild.fetch_channel(payload.channel_id)
+            channel: Thread = await self.bot.fetch_channel(payload.channel_id)
             if (getattr(channel, "id", 0) not in config.starboard_allowed_channels or
                 getattr(channel, "parent_id", 0) not in config.starboard_allowed_channels) and (
                 getattr(channel, "category_id", 0) not in config.starboard_allowed_channels
@@ -154,4 +153,4 @@ class Starboard(commands.Cog, name="Starboard"):
 
 
 async def setup(client):
-    await client.add_cog(Starboard(client))
+    await client.add_cog(Starboard(client), guilds=client.guilds)

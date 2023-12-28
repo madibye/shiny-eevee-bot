@@ -71,12 +71,12 @@ def generate_type_loops(side_count: int = 3, type_count: int = 2):
                         perfect_loop_file.writelines((write_str := write_str + f" (<- {get_type_matchup(combo[0], combo[-1])}x | {get_type_matchup(combo[-1], combo[0])}x ->)") + '\n')
                         write_str = '[!!] ' + write_str
                     type_loop_file.writelines(write_str + '\n')
-                    i += 1
-                    if i % 5 == 0:
-                        sleep(0.01)
-                    if i % 50000 == 0:
-                        print(f"I'm {round(i/50000)}% of the way there... I think!?!")
                     break
+            i += 1
+            if i % 5 == 0:
+                sleep(0.01)
+            if i % 50000 == 0:
+                print(f"I'm {round(i/50000)}% of the way there... I think!?!")
         type_loop_file.seek(0)
         perfect_loop_file.seek(0)
         return File('./type_loops.txt'), File('./perfect_loops.txt')
