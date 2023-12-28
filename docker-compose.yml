@@ -7,8 +7,8 @@ services:
       - mongo_data:/data/db
     restart: always
 
-  amelia-bot:
-    container_name: "amelia"
+  shiny-eevee-bot:
+    container_name: "ev"
     build: .
     depends_on:
       - mongo

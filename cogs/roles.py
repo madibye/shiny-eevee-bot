@@ -9,7 +9,7 @@ from discord.utils import MISSING
 import config
 from handlers import database
 from handlers.component_globals import *
-from main import Amelia
+from main import ShinyEevee
 
 
 class CustomRoleView(ComponentBase):
@@ -19,7 +19,7 @@ class CustomRoleView(ComponentBase):
 
 class Roles(commands.Cog, name="roles"):
     def __init__(self, bot):
-        self.bot: Amelia = bot
+        self.bot: ShinyEevee = bot
         self.guild: Guild | None = None
         self.roles_channel: TextChannel | None = None
 

@@ -7,12 +7,12 @@ from discord.ext import commands
 
 from handlers import database, scheduler, embedding
 from handlers.scheduler import ScheduledEvent, ScheduledEventType as SET
-from main import Amelia
+from main import ShinyEevee
 
 
 class Reminders(commands.Cog, name="Reminders"):
     def __init__(self, bot):
-        self.bot: Amelia = bot
+        self.bot: ShinyEevee = bot
 
     @commands.Cog.listener()
     async def on_ready(self):

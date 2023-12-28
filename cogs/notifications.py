@@ -3,12 +3,12 @@ from discord.ext import commands
 
 import config
 from handlers import scheduler
-from main import Amelia
+from main import ShinyEevee
 
 
 class Notifications(commands.Cog, name="notifications"):
     def __init__(self, bot):
-        self.bot: Amelia = bot
+        self.bot: ShinyEevee = bot
         self.ccgse_channel: TextChannel | None = None
         self.club_channel: Thread | None = None
         self.minecraft_channel: TextChannel | None = None

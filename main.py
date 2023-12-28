@@ -9,7 +9,7 @@ import config
 intents = Intents.all()
 
 
-class Amelia(Bot):
+class ShinyEevee(Bot):
     def __init__(self):
         super().__init__(command_prefix=["!"], help_command=None, application_id=config.bot_application_id, intents=intents)
 
@@ -33,5 +33,5 @@ class Amelia(Bot):
 
 
 if __name__ == "__main__":
-    bot = Amelia()
+    bot = ShinyEevee()
     bot.run(config.discord_token, log_level=40)

@@ -15,7 +15,7 @@ from termcolor import cprint
 import config
 from handlers import database
 from handlers.component_globals import ComponentBase
-from main import Amelia
+from main import ShinyEevee
 
 
 class SubError(Exception):
@@ -50,7 +50,7 @@ NEEDS_TARGET = [ScheduledEventType.REMINDER, ScheduledEventType.SUB, ScheduledEv
 
 class ScheduledEvent:
     def __init__(
-            self, bot: Amelia, event_type: ScheduledEventType, timestamp: int, channel_id: int,
+            self, bot: ShinyEevee, event_type: ScheduledEventType, timestamp: int, channel_id: int,
             target_id: int = 0, url: str = "", raw_data: dict | None = None, extra_args=None
     ):
         """
@@ -67,7 +67,7 @@ class ScheduledEvent:
                          Don't worry about setting this 99% of the time.
         :param extra_args: (Optional) Any extra information we need to pass our event.
         """
-        self.bot: Amelia = bot
+        self.bot: ShinyEevee = bot
         self.event_type: ScheduledEventType = event_type
         self.timestamp: int = timestamp
         self.target: User | None = self.bot.get_user(target_id) if target_id else None
@@ -157,7 +157,7 @@ class ScheduledEvent:
 
 
 @tasks.loop(seconds=15)
-async def schedule_loop(bot: Amelia):
+async def schedule_loop(bot: ShinyEevee):
     current_ts = time.time()
     for reminder in [reminder_from_dict(bot, r) for r in database.get_all_reminders() if r.get("timestamp", 0) <= current_ts]:
         if (not reminder.channel) and reminder.target and reminder.event_type in [
@@ -175,7 +175,7 @@ async def schedule_loop(bot: Amelia):
         reminder.remove_from_db()
 
 
-def reminder_from_dict(bot: Amelia, data: dict) -> ScheduledEvent:
+def reminder_from_dict(bot: ShinyEevee, data: dict) -> ScheduledEvent:
     try:
         event_type = ScheduledEventType(data.get("event_type", data.get("type")))
     except ValueError:
@@ -187,7 +187,7 @@ def reminder_from_dict(bot: Amelia, data: dict) -> ScheduledEvent:
                           url=data.get("url", ""), raw_data=data, extra_args=data.get("extra_args", data.get("note")))
 
 
-async def scheduler_add(bot: Amelia, ctx: Context, args, unsub=False) -> str:
+async def scheduler_add(bot: ShinyEevee, ctx: Context, args, unsub=False) -> str:
     schedule_str = ""
     timezone: tzinfo = tz.gettz(database.get_user_timezone(ctx.author.id))
     current_time = datetime.now(tz=timezone)
@@ -211,7 +211,7 @@ def info_from_channel(channel):
     }.get(channel.id, (None, None))
 
 
-async def sub(channel: TextChannel | Thread, bot: Amelia, target_id: int, unsub: bool = False, ping: bool = True) -> str:
+async def sub(channel: TextChannel | Thread, bot: ShinyEevee, target_id: int, unsub: bool = False, ping: bool = True) -> str:
     guild = bot.get_guild(config.koala_city_id)
     target = await guild.fetch_member(target_id)
     notif_role, msg_end = info_from_channel(channel)

@@ -4,12 +4,12 @@ from discord.ext import commands
 import config
 from config.live_config import lc
 from handlers import database, embedding
-from main import Amelia
+from main import ShinyEevee
 
 
 class Admin(commands.Cog, name="admin"):
     def __init__(self, bot):
-        self.bot: Amelia = bot
+        self.bot: ShinyEevee = bot
         self.leadership_channel: TextChannel | None = None
 
     @commands.has_role("alpha koala")
@@ -76,5 +76,5 @@ class Admin(commands.Cog, name="admin"):
         await ctx.message.add_reaction("✅")
 
 
-async def setup(client: Amelia):
+async def setup(client: ShinyEevee):
     await client.add_cog(Admin(client), guilds=client.guilds)

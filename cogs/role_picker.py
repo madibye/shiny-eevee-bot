@@ -9,7 +9,7 @@ from discord.ui import Button
 from config import *
 from handlers import database, paginator
 from handlers.component_globals import ComponentBase
-from main import Amelia
+from main import ShinyEevee
 
 
 class RoleButtonCreator(Button):
@@ -32,7 +32,7 @@ class RoleButtons(ComponentBase):
 
 class RolePicker(commands.Cog, name="role_picker"):
     def __init__(self, bot):
-        self.bot: Amelia = bot
+        self.bot: ShinyEevee = bot
 
     @commands.has_role(991519471686668358)
     @commands.command(name="refresh", aliases=["rpr"])
