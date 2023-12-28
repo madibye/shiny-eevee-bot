@@ -29,7 +29,7 @@ class Amelia(Bot):
     @staticmethod
     async def on_ready():
         cprint(f"I've logged in as {bot.user.name}. I'm ready to go!", "green")
-        await bot.change_presence(activity=Game(name="hiiiiiii :)"))
+        await bot.change_presence(activity=Game(name=config.activity_text))
 
 
 if __name__ == "__main__":

@@ -31,7 +31,7 @@ koala_city_id = 991518170542260336
 
 mongo_url = os.environ.get("MONGO_URL", "mongodb://mongo/")
 
-activity_text = "hi hi :)"
+activity_text = "Version numbering is not real"
 command_prefixes = ['!']
 
 # Roles
