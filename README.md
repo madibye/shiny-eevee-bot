@@ -1,4 +1,2 @@
-# Amelia!!
-madi's personal bot :)
-
-- the bot is still open source, however, i've recently changed the code such that it will only run in Koala City. sorry!!
+# Shiny Eevee
+Hi, this is my personal Discord bot. I currently use it in a couple servers I own. Feel free to add it to your server though if you can make use of it. The bot's user is currently `ShinyEevee#8072`.
