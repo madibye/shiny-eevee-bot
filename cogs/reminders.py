@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta, tzinfo
 
 from dateutil import tz
-from discord import DMChannel, Interaction, app_commands
+from discord import DMChannel, Interaction, app_commands, Object
 from discord.errors import Forbidden, HTTPException, NotFound
 from discord.ext import commands
 
@@ -20,6 +20,7 @@ class Reminders(commands.Cog, name="Reminders"):
             scheduler.schedule_loop.start(self.bot)
         except RuntimeError:
             print("Failed to start schedule loop as it is already running.")
+        [self.bot.tree.add_command(command, guilds=self.bot.guilds) for command in self.get_app_commands()]
 
     @commands.command(name="remindme", aliases=["remind", "rm"])
     async def remindme(self, ctx, *, time_and_note):
@@ -146,5 +147,5 @@ class Reminders(commands.Cog, name="Reminders"):
         await interaction.message.delete(delay=10)
 
 
-async def setup(client):
+async def setup(client: ShinyEevee):
     await client.add_cog(Reminders(client), guilds=client.guilds)
