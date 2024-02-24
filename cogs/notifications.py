@@ -1,4 +1,4 @@
-from discord import Interaction, app_commands, TextChannel, Thread
+from discord import Interaction, app_commands, TextChannel, Thread, Object
 from discord.ext import commands
 
 import config
@@ -18,7 +18,7 @@ class Notifications(commands.Cog, name="notifications"):
         self.ccgse_channel: TextChannel | None = self.bot.get_channel(config.ccgse_channel)
         self.club_channel: Thread | None = self.bot.get_channel(config.club_channel)
         self.minecraft_channel: TextChannel | None = self.bot.get_channel(config.minecraft_channel)
-        [self.bot.tree.add_command(command, guild=config.koala_city_id) for command in self.get_app_commands()]
+        [self.bot.tree.add_command(command, guild=Object(config.koala_city_id)) for command in self.get_app_commands()]
 
     # yes he is naked. please don't make fun of him :(
     sub_command_group = app_commands.Group(name="sub", description="Receive notifications for various things in the server!")
