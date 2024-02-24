@@ -1,6 +1,6 @@
 import traceback
 
-from discord import Game, Intents
+from discord import Game, Intents, Object
 from discord.ext.commands import Bot
 from termcolor import cprint
 
@@ -27,11 +27,12 @@ class ShinyEevee(Bot):
                 traceback.print_exc()
                 cprint(f"Cog {extension} could not be loaded for reason: {error}", "red")
         for guild in self.guilds:
+            await self.tree.sync(guild=Object(guild.id))  # Sync slash commands for each server
             if guild.id in [guild.id for guild in (await self.fetch_user(188875600373481472)).mutual_guilds]:
                 continue
-            print(f"Leaving guild {guild.name} {guild.id}")
+            cprint(f"Leaving guild {guild.name} {guild.id}", "red")
             await guild.leave()
-        await self.tree.sync()  # Sync our slash commands
+        await self.tree.sync()  # Sync our global slash commands
 
     @staticmethod
     async def on_ready():
