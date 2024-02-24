@@ -6,3 +6,4 @@ pymongo==4.6.1
 parsedatetime==2.6
 aiohttp==3.9.1
 numpy==1.26.2
+soundfile==0.12.1
