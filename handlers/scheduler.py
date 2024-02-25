@@ -71,9 +71,7 @@ class ScheduledEvent:
         self.event_type: ScheduledEventType = event_type
         self.timestamp: int = timestamp
         self.target: User | None = self.bot.get_user(target_id) if target_id else None
-        self.channel: ForumChannel | TextChannel | CategoryChannel | Thread | DMChannel = self.bot.get_channel(
-            channel_id)
-        self.guild: Guild = self.channel.guild
+        self.channel: ForumChannel | TextChannel | CategoryChannel | Thread | DMChannel = self.bot.get_channel(channel_id)
         self.url: str = url
         self.extra_args = extra_args
         self.raw_data: dict = raw_data if raw_data else self.__dict__()
@@ -112,14 +110,14 @@ class ScheduledEvent:
         try:
             prev_msg = await self.channel.fetch_message(prev_id)
             await prev_msg.delete()
-        except (Forbidden, HTTPException, NotFound):
+        except (Forbidden, HTTPException, NotFound, AttributeError):
             try:  # Nested try excepts!!!!!! Yay
                 prev_msg = await self.channel.fetch_message(prev_id)
                 await prev_msg.delete()
-            except (Forbidden, HTTPException, NotFound):
+            except (Forbidden, HTTPException, NotFound, AttributeError):
                 pass
         # if the URL is empty, this means it's a slash command; therefore, we should DM the user
-        if self.url == "":
+        if self.url == "" or not self.channel:
             try:
                 await self.target.send(f"Hey there, {edited_note}")
             except Forbidden:
@@ -171,7 +169,10 @@ async def schedule_loop(bot: ShinyEevee):
             cprint(f"Oopsie, something went wrong with a reminder, here's the reminder dict:\n{reminder.raw_data}", "red")
             reminder.remove_from_db()
             continue
-        await reminder.callback()
+        try:
+            await reminder.callback()
+        except Exception as e:
+            cprint(f'You lost: {e}', 'red')
         reminder.remove_from_db()
 
 
