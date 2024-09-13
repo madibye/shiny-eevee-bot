@@ -1,10 +1,11 @@
 import sys
 
 import aiohttp
-from discord import Guild, app_commands, TextChannel, Embed, ButtonStyle, Object
+from discord import app_commands, TextChannel, Embed, ButtonStyle
 from discord.errors import Forbidden, HTTPException
 from discord.ext import commands
 from discord.utils import MISSING
+from termcolor import cprint
 
 import config
 from handlers import database
@@ -119,19 +120,24 @@ class Roles(commands.Cog, name="roles"):
             if not name:
                 name = interaction.user.display_name
             role = await interaction.guild.create_role(name=name)
-            all_roles_in_guild = await interaction.guild.fetch_roles()
-            await role.edit(position=len(all_roles_in_guild))
+            cprint(f"created role {name} ({role.id})", "yellow")
+            all_roles = await interaction.guild.fetch_roles()
+            await role.edit(position=len(all_roles))
+            cprint(f"moved role {name} ({role.id}) to position {len(all_roles)}", "yellow")
             await interaction.user.add_roles(role)
+            cprint(f"added role {name} ({role.id}) to user {interaction.user.name} {interaction.user.id}", "yellow")
             database.edit_custom_role(str(interaction.guild.id), str(interaction.user.id), role.id)
         else:
             role = interaction.guild.get_role(custom_roles_db.get(str(interaction.guild.id), {}).get(str(interaction.user.id)))
             if role:
                 await interaction.user.add_roles(role)  # Make sure they have the role of course
+                cprint(f"added role {role.name} ({role.id}) to user {interaction.user.name} {interaction.user.id}", "yellow")
         try:
             await role.edit(
                 name=name if name else MISSING,
                 colour=int(color.replace('#', ''), base=16) if color else MISSING,
                 display_icon=icon_file if icon_file else MISSING)
+            cprint(f"edited role {name} ({role.id})", "yellow")
         except (Forbidden, HTTPException, ValueError):
             return await interaction.response.send_message(f"sorry, something went wrong while updating your role :(")
         return await interaction.response.send_message(f"okay, your custom role has been set to <@&{role.id}>!!", ephemeral=True)
