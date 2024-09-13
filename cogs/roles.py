@@ -20,12 +20,10 @@ class CustomRoleView(ComponentBase):
 class Roles(commands.Cog, name="roles"):
     def __init__(self, bot):
         self.bot: ShinyEevee = bot
-        self.guild: Guild | None = None
         self.roles_channel: TextChannel | None = None
 
     @commands.Cog.listener()
     async def on_ready(self):
-        self.guild = self.bot.get_guild(config.koala_city_id)
         self.roles_channel = await self.bot.fetch_channel(config.roles_channel)
         [self.bot.tree.add_command(command, guild=Object(config.koala_city_id)) for command in self.get_app_commands()]
 
@@ -55,7 +53,7 @@ class Roles(commands.Cog, name="roles"):
         name_placeholder = interaction.user.display_name
         icon_placeholder = "The URL of a role icon you want. Must be under 256kb!!"
         if role_id := custom_roles_db.get(str(interaction.user.id)):
-            role = self.guild.get_role(role_id)
+            role = interaction.guild.get_role(role_id)
             color_placeholder = hex(int(role.colour)).replace('0x', '#')
             name_placeholder = role.name
             icon_placeholder = role.icon.url
@@ -120,13 +118,13 @@ class Roles(commands.Cog, name="roles"):
         if not custom_roles_db.get(str(interaction.user.id)):
             if not name:
                 name = interaction.user.display_name
-            role = await self.guild.create_role(name=name)
-            top_non_custom_role = self.guild.get_role(config.top_non_custom_role)
-            await role.edit(position=top_non_custom_role.position + 1)
+            role = await interaction.guild.create_role(name=name)
+            all_roles_in_guild = await interaction.guild.fetch_roles()
+            await role.edit(position=len(all_roles_in_guild))
             await interaction.user.add_roles(role)
             database.edit_custom_role(str(interaction.user.id), role.id)
         else:
-            role = self.guild.get_role(custom_roles_db[str(interaction.user.id)])
+            role = interaction.guild.get_role(custom_roles_db[str(interaction.user.id)])
             await interaction.user.add_roles(role)  # Make sure they have the role of course
         try:
             await role.edit(
