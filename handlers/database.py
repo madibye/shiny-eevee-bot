@@ -58,21 +58,21 @@ def get_keep_alive_threads():
 
 def create_custom_role_list():
     roles_doc = {
-        "_id": "custom_roles",
-        "role_ids": {}  # {user_id: role_id, etc.}
+        "_id": "sa_custom_roles",
+        "role_ids": {}  # {guild_id: {user_id: role_id}, etc.}
     }
     db_roles.insert_one(roles_doc)
     return roles_doc
 
-def edit_custom_role(user_id: str, role_id: int):
-    roles_doc = db_roles.find_one({"_id": "custom_roles"})
+def edit_custom_role(guild_id: str, user_id: str, role_id: int):
+    roles_doc = db_roles.find_one({"_id": "sa_custom_roles"})
     if not roles_doc:
         roles_doc = create_custom_role_list()
-    roles_doc["role_ids"][user_id] = role_id
-    return db_roles.replace_one({"_id": "custom_roles"}, roles_doc)
+    roles_doc["role_ids"][guild_id][user_id] = role_id
+    return db_roles.replace_one({"_id": "sa_custom_roles"}, roles_doc)
 
 def get_custom_roles():
-    roles_doc = db_roles.find_one({"_id": "custom_roles"})
+    roles_doc = db_roles.find_one({"_id": "sa_custom_roles"})
     if not roles_doc:
         roles_doc = create_custom_role_list()
     return roles_doc["role_ids"]

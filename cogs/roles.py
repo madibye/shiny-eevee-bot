@@ -39,7 +39,7 @@ class Roles(commands.Cog, name="roles"):
     async def set_custom_role(self, ctx: Context, user_id: int, role_id: int):
         if ctx.channel.id != 997571188727492749:
             return
-        database.edit_custom_role(str(user_id), role_id)
+        database.edit_custom_role(str(ctx.guild.id), str(user_id), role_id)
         return await ctx.send(f"Set <@{user_id}>'s custom role to <@&{role_id}>!")
 
     @commands.Cog.listener()
@@ -52,7 +52,7 @@ class Roles(commands.Cog, name="roles"):
         color_placeholder = "Awaiting your input...!"
         name_placeholder = interaction.user.display_name
         icon_placeholder = "The URL of a role icon you want. Must be under 256kb!!"
-        if role_id := custom_roles_db.get(str(interaction.user.id)):
+        if role_id := custom_roles_db.get(interaction.guild.id).get(str(interaction.user.id)):
             role = interaction.guild.get_role(role_id)
             color_placeholder = hex(int(role.colour)).replace('0x', '#')
             name_placeholder = role.name
@@ -115,17 +115,18 @@ class Roles(commands.Cog, name="roles"):
                     icon_file = await resp.read()
                     if sys.getsizeof(icon_file) >= 256000:
                         return await interaction.response.send_message("sorry, this file is too big, they have to be under 256kb!! :(", ephemeral=True)
-        if not custom_roles_db.get(str(interaction.user.id)):
+        if not custom_roles_db.get(str(interaction.guild.id)).get(str(interaction.user.id)):
             if not name:
                 name = interaction.user.display_name
             role = await interaction.guild.create_role(name=name)
             all_roles_in_guild = await interaction.guild.fetch_roles()
             await role.edit(position=len(all_roles_in_guild))
             await interaction.user.add_roles(role)
-            database.edit_custom_role(str(interaction.user.id), role.id)
+            database.edit_custom_role(str(interaction.guild.id), str(interaction.user.id), role.id)
         else:
-            role = interaction.guild.get_role(custom_roles_db[str(interaction.user.id)])
-            await interaction.user.add_roles(role)  # Make sure they have the role of course
+            role = interaction.guild.get_role(custom_roles_db.get(str(interaction.guild.id), {}).get(str(interaction.user.id)))
+            if role:
+                await interaction.user.add_roles(role)  # Make sure they have the role of course
         try:
             await role.edit(
                 name=name if name else MISSING,
