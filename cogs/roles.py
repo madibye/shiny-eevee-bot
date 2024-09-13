@@ -121,9 +121,6 @@ class Roles(commands.Cog, name="roles"):
                 name = interaction.user.display_name
             role = await interaction.guild.create_role(name=name)
             cprint(f"created role {name} ({role.id})", "yellow")
-            all_roles = await interaction.guild.fetch_roles()
-            await role.edit(position=len(all_roles))
-            cprint(f"moved role {name} ({role.id}) to position {len(all_roles)}", "yellow")
             await interaction.user.add_roles(role)
             cprint(f"added role {name} ({role.id}) to user {interaction.user.name} {interaction.user.id}", "yellow")
             database.edit_custom_role(str(interaction.guild.id), str(interaction.user.id), role.id)
