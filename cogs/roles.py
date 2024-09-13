@@ -25,7 +25,7 @@ class Roles(commands.Cog, name="roles"):
     @commands.Cog.listener()
     async def on_ready(self):
         self.roles_channel = await self.bot.fetch_channel(config.roles_channel)
-        [self.bot.tree.add_command(command, guild=Object(config.koala_city_id)) for command in self.get_app_commands()]
+        [self.bot.tree.add_command(command, guilds=self.bot.guilds) for command in self.get_app_commands()]
 
     @app_commands.command(name="customrole", description="set your own custom role color with this nice little slash command :)")
     @app_commands.describe(color="the hex color for your role. you can leave out the # if you like. set to 0 to clear color!",

@@ -26,8 +26,6 @@ load_dotenv()
 
 _true = ["true", "True", "t", "T", "1", "yes", "Yes", "YES"]
 
-koala_city_id = 991518170542260336
-
 
 mongo_url = os.environ.get("MONGO_URL", "mongodb://mongo/")
 

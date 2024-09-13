@@ -18,8 +18,6 @@ class ShinyEevee(Bot):
         lc.load()  # Anyways, let's also wait for the live config to load up before starting
         for command in await self.tree.fetch_commands():
             self.tree.remove_command(command.name)
-        for command in await self.tree.fetch_commands(guild=Object(config.koala_city_id)):
-            self.tree.remove_command(command.name, guild=Object(config.koala_city_id))
         for extension in config.discord_cogs:
             try:
                 await self.load_extension(extension)

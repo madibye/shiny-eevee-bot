@@ -213,7 +213,7 @@ def info_from_channel(channel):
 
 
 async def sub(channel: TextChannel | Thread, bot: ShinyEevee, target_id: int, unsub: bool = False, ping: bool = True) -> str:
-    guild = bot.get_guild(config.koala_city_id)
+    guild = channel.guild
     target = await guild.fetch_member(target_id)
     notif_role, msg_end = info_from_channel(channel)
     if not notif_role:
