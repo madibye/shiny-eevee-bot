@@ -109,6 +109,8 @@ class Roles(commands.Cog, name="roles"):
         custom_roles_db = database.get_custom_roles()
         icon_file: bytes | None = None
         if icon:
+            if interaction.guild.premium_tier < 2:
+                return await interaction.response.send_message("sorry, seems there's not enough server boosters in here for you to set an icon... :(", ephemeral=True)
             async with aiohttp.ClientSession() as session:
                 async with session.get(icon) as resp:
                     if resp.status != 200:
@@ -136,7 +138,7 @@ class Roles(commands.Cog, name="roles"):
                 display_icon=icon_file if icon_file else MISSING)
             cprint(f"edited role {name} ({role.id})", "yellow")
         except (Forbidden, HTTPException, ValueError):
-            return await interaction.response.send_message(f"sorry, something went wrong while updating your role :(")
+            return await interaction.response.send_message(f"sorry, something went wrong while updating your role :(", ephemeral=True)
         return await interaction.response.send_message(f"okay, your custom role has been set to <@&{role.id}>!!", ephemeral=True)
 
 
