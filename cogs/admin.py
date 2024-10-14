@@ -79,6 +79,14 @@ class Admin(commands.Cog, name="admin"):
         database.set_config_description(key, new_description)
         await ctx.message.add_reaction("✅")
 
+    @commands.command(name="sync")
+    async def sync_commands(self, ctx, guild_id=-1):
+        if ctx.author.id != config.madi_id:
+            return
+        if guild_id > 0:
+            await self.bot.tree.sync(guild=self.bot.get_guild(guild_id))
+        else:
+            await self.bot.tree.sync()
 
 async def setup(client: ShinyEevee):
     await client.add_cog(Admin(client), guilds=client.guilds)

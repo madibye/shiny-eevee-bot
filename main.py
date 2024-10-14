@@ -15,9 +15,7 @@ class ShinyEevee(Bot):
 
     async def setup_hook(self):
         from config.live_config import lc  # Please don't worry about why this is here
-        lc.load()  # Anyways, let's also wait for the live config to load up before starting
-        for command in await self.tree.fetch_commands():
-            self.tree.remove_command(command.name)
+        lc.load()  # Anyways, let's also load the live config before starting
         for extension in config.discord_cogs:
             try:
                 await self.load_extension(extension)
@@ -27,7 +25,7 @@ class ShinyEevee(Bot):
                 cprint(f"Cog {extension} could not be loaded for reason: {error}", "red")
         for guild in self.guilds:
             await self.tree.sync(guild=Object(guild.id))  # Sync slash commands for each server
-            if guild.id in [guild.id for guild in (await self.fetch_user(188875600373481472)).mutual_guilds]:
+            if guild.id in [guild.id for guild in (await self.fetch_user(config.madi_id)).mutual_guilds]:
                 continue
             cprint(f"Leaving guild {guild.name} {guild.id}", "red")
             await guild.leave()
