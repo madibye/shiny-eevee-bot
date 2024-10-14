@@ -37,6 +37,7 @@ ccgse_notif_role = 996963548959871069
 minecraft_notif_role = 1007714356189991083
 club_notif_role = 1007714385642393655
 top_non_custom_role = 1284188112238411809
+madi_id = 188875600373481472
 admin_roles = [1284185231255146603]
 
 # Channels
@@ -60,7 +61,6 @@ discord_cogs = [
     "cogs.reminders",
     "cogs.fun",
     "cogs.threads",
-    "cogs.roles",
     "cogs.notifications",
     "cogs.role_picker",
     "cogs.starboard",

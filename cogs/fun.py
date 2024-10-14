@@ -49,7 +49,7 @@ class Fun(Cog, name="Fun"):
 
     @command(name="biglist")
     async def big_list(self, ctx: Context, side_count: int, type_count: int):
-        if ctx.author.id != 188875600373481472:
+        if ctx.author.id != config.madi_id:
             return
         await ctx.send("Okie, I'll go ahead and start working on that!! I'll letcha know when I'm all finished up :)")
         files = generate_type_loops(side_count, type_count)
