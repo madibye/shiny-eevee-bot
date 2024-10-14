@@ -4,7 +4,7 @@ from discord.ext.commands import Context
 
 import config
 from config.live_config import lc
-from handlers import database, embedding
+from handlers import database, embedding, command_helpers
 from main import ShinyEevee
 
 
@@ -13,10 +13,9 @@ class Admin(commands.Cog, name="admin"):
         self.bot: ShinyEevee = bot
         self.leadership_channel: TextChannel | None = None
 
+    @command_helpers.madi_only
     @commands.command(name="viewconfig", aliases=["vc"])
     async def view_all_config(self, ctx: Context):
-        if ctx.author.id != config.madi_id:
-            return
         key_list = [item for item in lc.__slots__ if type(getattr(lc, item)) in [str, int, bool, float]]
         text_list = []
         for key in key_list:
@@ -33,10 +32,9 @@ class Admin(commands.Cog, name="admin"):
             error_msg="Couldn't find any config entries in the db!"
         )
 
+    @command_helpers.madi_only
     @commands.command(name="setconfigvalue", aliases=["scv"])
     async def set_config_value(self, ctx, key: str, new_value: str):
-        if ctx.author.id != config.madi_id:
-            return
         if config.scv_blocked.get(key):
             return await ctx.send(f"This is a blocked key! Use `{config.scv_blocked[key]}` instead.", reference=ctx.message)
         if key not in lc.__slots__:
@@ -62,10 +60,9 @@ class Admin(commands.Cog, name="admin"):
         lc.set(key, new_value)
         await ctx.message.add_reaction("✅")
 
+    @command_helpers.madi_only
     @commands.command(name="setconfigdescription", aliases=["scd"])
     async def set_config_description(self, ctx, key: str, *args):
-        if ctx.author.id != config.madi_id:
-            return
         if not args:
             await ctx.message.add_reaction("❌")
             return await ctx.send(f"Please specify a description to be set!", reference=ctx.message)
@@ -79,10 +76,9 @@ class Admin(commands.Cog, name="admin"):
         database.set_config_description(key, new_description)
         await ctx.message.add_reaction("✅")
 
+    @command_helpers.madi_only
     @commands.command(name="sync")
     async def sync_commands(self, ctx, guild_id=-1):
-        if ctx.author.id != config.madi_id:
-            return
         if guild_id > 0:
             await self.bot.tree.sync(guild=self.bot.get_guild(guild_id))
         else:

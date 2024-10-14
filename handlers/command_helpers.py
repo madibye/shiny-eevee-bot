@@ -4,6 +4,16 @@ from discord.ext.commands import Context
 
 import config
 
+def madi_only(func):
+    def wrapper(*args, **kwargs):
+        print(kwargs)
+        if "ctx" not in kwargs:
+            return
+        if kwargs["ctx"].author.id != config.madi_id:
+            return
+        func(*args, **kwargs)
+    return wrapper
+
 
 def parse_args(ctx: Context) -> List[str]:
     args = ctx.message.content

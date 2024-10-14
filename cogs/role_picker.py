@@ -7,7 +7,7 @@ from discord.ext.commands.context import Context
 from discord.ui import Button
 
 from config import *
-from handlers import database, paginator
+from handlers import database, paginator, command_helpers
 from handlers.component_globals import ComponentBase
 from main import ShinyEevee
 
@@ -34,18 +34,16 @@ class RolePicker(commands.Cog, name="role_picker"):
     def __init__(self, bot):
         self.bot: ShinyEevee = bot
 
+    @command_helpers.madi_only
     @commands.command(name="refresh", aliases=["rpr"])
     async def refresh(self, ctx: Context, *args):
-        if ctx.author.id != config.madi_id:
-            return
         refreshed = await self.role_picker_refresh(*args)
         await ctx.send("i refreshed the role pickers for you! :)" if refreshed else
                        "couldn't find any role pickers with that name :(", reference=ctx.message)
 
+    @command_helpers.madi_only
     @commands.command(name="viewrolepickers", aliases=["viewrolepickerinfo", "vrpi", "vrp"])
     async def view_role_picker_info(self, ctx: Context):
-        if ctx.author.id != config.madi_id:
-            return
         info_embeds = []
         role_picker_list = database.get_role_picker_db()
         for key, role_picker_info in role_picker_list.items():
@@ -64,10 +62,9 @@ class RolePicker(commands.Cog, name="role_picker"):
         p = paginator.Paginator(ctx, info_embeds, self.bot)
         await p.paginate()
 
+    @command_helpers.madi_only
     @commands.command(name="addrolepicker", aliases=["arp"])
     async def add_role_picker(self, ctx: Context, key: str):
-        if ctx.author.id != config.madi_id:
-            return
         role_picker_list = database.get_role_picker_db()
         if key in role_picker_list:
             return await ctx.send(
@@ -79,10 +76,9 @@ class RolePicker(commands.Cog, name="role_picker"):
             f"use `!editrolepicker` to set its properties before `!refresh`ing it into existence, pleeeease :)",
             reference=ctx.message)
 
+    @command_helpers.madi_only
     @commands.command(name="removerolepicker", aliases=["killrolepicker", "krp", "rrp"])
     async def remove_role_picker(self, ctx: Context, key: str):
-        if ctx.author.id != config.madi_id:
-            return
         role_picker_list = database.get_role_picker_db()
         if key not in role_picker_list:
             return await ctx.send(f"i can't find a role picker with the ID of {key} :(", reference=ctx.message)
@@ -91,10 +87,9 @@ class RolePicker(commands.Cog, name="role_picker"):
         database.set_role_picker_db(role_picker_list)
         return await ctx.send(f"okay, i deleted the role picker with the ID of {key}... sad to see it go :(", reference=ctx.message)
 
+    @command_helpers.madi_only
     @commands.command(name="editrolepicker", aliases=["editrp", "erp"])
     async def edit_role_picker(self, ctx: Context, key: str, value: str, *, args: str):
-        if ctx.author.id != config.madi_id:
-            return
         role_picker_list = database.get_role_picker_db()
         if key not in role_picker_list:
             return await ctx.send(f"i can't find a role picker with the ID of {key} :(", reference=ctx.message)

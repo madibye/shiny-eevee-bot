@@ -8,7 +8,7 @@ from discord.utils import MISSING
 from termcolor import cprint
 
 import config
-from handlers import database
+from handlers import database, command_helpers
 from handlers.component_globals import *
 from main import ShinyEevee
 
@@ -25,7 +25,6 @@ class Roles(commands.Cog, name="roles"):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        self.roles_channel = await self.bot.fetch_channel(config.roles_channel)
         [self.bot.tree.add_command(command, guilds=self.bot.guilds) for command in self.get_app_commands()]
 
     @app_commands.command(name="customrole", description="set your own custom role color with this nice little slash command :)")
@@ -35,11 +34,10 @@ class Roles(commands.Cog, name="roles"):
     async def custom_role(self, interaction: Interaction, color: str | None = None, name: str | None = None, icon: str | None = None):
         await self.configure_custom_role(interaction, color, name, icon)
 
+    @command_helpers.madi_only
     @commands.command(name="setcustomrole", aliases=["scr"])
     @commands.has_any_role(config.admin_roles)
     async def set_custom_role(self, ctx: Context, user_id: int, role_id: int):
-        if ctx.channel.id != 997571188727492749:
-            return
         database.edit_custom_role(str(ctx.guild.id), str(user_id), role_id)
         return await ctx.send(f"Set <@{user_id}>'s custom role to <@&{role_id}>!")
 
