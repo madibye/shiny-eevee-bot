@@ -1,19 +1,8 @@
-from typing import List
+from typing import List, Coroutine
 
 from discord.ext.commands import Context
 
 import config
-
-async def madi_only(func):
-    async def wrapper(*args, **kwargs):
-        print(kwargs)
-        if "ctx" not in kwargs:
-            return
-        if kwargs["ctx"].author.id != config.madi_id:
-            return
-        await func(*args, **kwargs)
-    return wrapper
-
 
 def parse_args(ctx: Context) -> List[str]:
     args = ctx.message.content

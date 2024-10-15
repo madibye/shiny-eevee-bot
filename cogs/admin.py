@@ -14,8 +14,9 @@ class Admin(commands.Cog, name="admin"):
         self.leadership_channel: TextChannel | None = None
 
     @commands.command(name="viewconfig", aliases=["vc"])
-    @command_helpers.madi_only
     async def view_all_config(self, ctx: Context):
+        if ctx.author.id != config.madi_id:
+            return
         key_list = [item for item in lc.__slots__ if type(getattr(lc, item)) in [str, int, bool, float]]
         text_list = []
         for key in key_list:
@@ -33,8 +34,9 @@ class Admin(commands.Cog, name="admin"):
         )
 
     @commands.command(name="setconfigvalue", aliases=["scv"])
-    @command_helpers.madi_only
     async def set_config_value(self, ctx, key: str, new_value: str):
+        if ctx.author.id != config.madi_id:
+            return
         if config.scv_blocked.get(key):
             return await ctx.send(f"This is a blocked key! Use `{config.scv_blocked[key]}` instead.", reference=ctx.message)
         if key not in lc.__slots__:
@@ -61,8 +63,9 @@ class Admin(commands.Cog, name="admin"):
         await ctx.message.add_reaction("✅")
 
     @commands.command(name="setconfigdescription", aliases=["scd"])
-    @command_helpers.madi_only
     async def set_config_description(self, ctx, key: str, *args):
+        if ctx.author.id != config.madi_id:
+            return
         if not args:
             await ctx.message.add_reaction("❌")
             return await ctx.send(f"Please specify a description to be set!", reference=ctx.message)
@@ -77,8 +80,9 @@ class Admin(commands.Cog, name="admin"):
         await ctx.message.add_reaction("✅")
 
     @commands.command(name="sync")
-    @command_helpers.madi_only
     async def sync_commands(self, ctx, guild_id=-1):
+        if ctx.author.id != config.madi_id:
+            return
         if guild_id > 0:
             await self.bot.tree.sync(guild=self.bot.get_guild(guild_id))
         else:

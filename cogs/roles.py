@@ -35,8 +35,9 @@ class Roles(commands.Cog, name="roles"):
         await self.configure_custom_role(interaction, color, name, icon)
 
     @commands.command(name="setcustomrole", aliases=["scr"])
-    @command_helpers.madi_only
     async def set_custom_role(self, ctx: Context, user_id: int, role_id: int):
+        if ctx.author.id != config.madi_id:
+            return
         database.edit_custom_role(str(ctx.guild.id), str(user_id), role_id)
         return await ctx.send(f"Set <@{user_id}>'s custom role to <@&{role_id}>!")
 
