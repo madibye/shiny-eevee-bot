@@ -63,6 +63,7 @@ discord_cogs = [
     "cogs.threads",
     "cogs.notifications",
     "cogs.role_picker",
+    "cogs.roles",
     "cogs.starboard",
 ]
 

@@ -47,8 +47,8 @@ class Fun(Cog, name="Fun"):
             answers_str = ', '.join(answers)
         await ctx.send(f"I've decided, you should pick **{answers_str}**!")
 
-    @command_helpers.madi_only
     @command(name="biglist")
+    @command_helpers.madi_only
     async def big_list(self, ctx: Context, side_count: int, type_count: int):
         await ctx.send("Okie, I'll go ahead and start working on that!! I'll letcha know when I'm all finished up :)")
         files = generate_type_loops(side_count, type_count)
