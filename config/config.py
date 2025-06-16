@@ -33,20 +33,8 @@ activity_text = "version numbering is for foolish fools who foolishly accept the
 command_prefixes = ['!']
 
 # Roles
-ccgse_notif_role = 996963548959871069
-minecraft_notif_role = 1007714356189991083
-club_notif_role = 1007714385642393655
-top_non_custom_role = 1284188112238411809
 madi_id = 188875600373481472
-admin_roles = [1284185231255146603]
-
-# Channels
-ccgse_channel = 993962449717960836
-minecraft_channel = 1009699321651925022
-club_channel = 991544912556339241
-roles_channel = 1066176296280924190
-starboard_channel = 991550133869223937
-starboard_allowed_channels = [991523087348662373, 991544337747951617, 991518171729231924]
+custom_role_allowed_servers = [1253961620711800873]
 
 remindme_ignore_words = ["this"]
 remindme_remove_words = ["in", "and", "on", "at", "@"]
@@ -61,10 +49,8 @@ discord_cogs = [
     "cogs.reminders",
     "cogs.fun",
     "cogs.threads",
-    "cogs.notifications",
     "cogs.role_picker",
     "cogs.roles",
-    "cogs.starboard",
 ]
 
 magicball_answers = [

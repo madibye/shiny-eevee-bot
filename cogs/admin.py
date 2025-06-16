@@ -11,7 +11,6 @@ from main import ShinyEevee
 class Admin(commands.Cog, name="admin"):
     def __init__(self, bot):
         self.bot: ShinyEevee = bot
-        self.leadership_channel: TextChannel | None = None
 
     @commands.command(name="viewconfig", aliases=["vc"])
     async def view_all_config(self, ctx: Context):

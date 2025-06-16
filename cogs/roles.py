@@ -8,7 +8,7 @@ from discord.utils import MISSING
 from termcolor import cprint
 
 import config
-from handlers import database, command_helpers
+from handlers import database
 from handlers.component_globals import *
 from main import ShinyEevee
 
@@ -79,7 +79,6 @@ class Roles(commands.Cog, name="roles"):
         await self.configure_custom_role(custom_role_modal.interaction, *component_data.value)
 
     @commands.command(name="refreshcustomroleembed", aliases=["rcre"])
-    @commands.has_any_role(config.admin_roles)
     async def refresh_custom_role_embed(self, ctx: Context):
         if ctx.channel.id != 997571188727492749:
             return
@@ -102,42 +101,44 @@ class Roles(commands.Cog, name="roles"):
 
     async def configure_custom_role(self, interaction: Interaction, color: str | None = None,
                                     name: str | None = None, icon: str | None = None):
+        if interaction.guild_id not in config.custom_role_allowed_servers:
+            return await interaction.response.send_message(f"Sorry, seems custom roles haven't been enabled in this server. Ask Madi about it!!", ephemeral=True)
         if not name and not color and not icon:
-            return await interaction.response.send_message(f"oh okay... but nothing changed :(", ephemeral=True)
+            return await interaction.response.send_message(f"Oh, okay... but nothing changed.", ephemeral=True)
         custom_roles_db = database.get_custom_roles()
         icon_file: bytes | None = None
         if icon:
             if interaction.guild.premium_tier < 2:
-                return await interaction.response.send_message("sorry, seems there's not enough server boosters in here for you to set an icon... :(", ephemeral=True)
+                return await interaction.response.send_message("Sorry, seems there's not enough server boosters in here for you to set an icon.", ephemeral=True)
             async with aiohttp.ClientSession() as session:
                 async with session.get(icon) as resp:
                     if resp.status != 200:
-                        return await interaction.response.send_message("sorry, i couldn\'t download the file... :(", ephemeral=True)
+                        return await interaction.response.send_message("Sorry, I couldn\'t download the file for some reason.", ephemeral=True)
                     icon_file = await resp.read()
                     if sys.getsizeof(icon_file) >= 256000:
-                        return await interaction.response.send_message("sorry, this file is too big, they have to be under 256kb!! :(", ephemeral=True)
+                        return await interaction.response.send_message("Sorry, this file is too big, they have to be under 256kb!!", ephemeral=True)
         if not custom_roles_db.get(str(interaction.guild.id), {}).get(str(interaction.user.id)):
             if not name:
                 name = interaction.user.display_name
             role = await interaction.guild.create_role(name=name)
-            cprint(f"created role {name} ({role.id})", "yellow")
+            cprint(f"Created role {name} ({role.id})", "yellow")
             await interaction.user.add_roles(role)
-            cprint(f"added role {name} ({role.id}) to user {interaction.user.name} {interaction.user.id}", "yellow")
+            cprint(f"Added role {name} ({role.id}) to user {interaction.user.name} {interaction.user.id}", "yellow")
             database.edit_custom_role(str(interaction.guild.id), str(interaction.user.id), role.id)
         else:
             role = interaction.guild.get_role(custom_roles_db.get(str(interaction.guild.id), {}).get(str(interaction.user.id)))
             if role:
                 await interaction.user.add_roles(role)  # Make sure they have the role of course
-                cprint(f"added role {role.name} ({role.id}) to user {interaction.user.name} {interaction.user.id}", "yellow")
+                cprint(f"Added role {role.name} ({role.id}) to user {interaction.user.name} {interaction.user.id}", "yellow")
         try:
             await role.edit(
                 name=name if name else MISSING,
                 colour=int(color.replace('#', ''), base=16) if color else MISSING,
                 display_icon=icon_file if icon_file else MISSING)
-            cprint(f"edited role {name} ({role.id})", "yellow")
+            cprint(f"Edited role {name} ({role.id})", "yellow")
         except (Forbidden, HTTPException, ValueError):
-            return await interaction.response.send_message(f"sorry, something went wrong while updating your role :(", ephemeral=True)
-        return await interaction.response.send_message(f"okay, your custom role has been set to <@&{role.id}>!!", ephemeral=True)
+            return await interaction.response.send_message(f"Sorry, something went wrong while updating your role.", ephemeral=True)
+        return await interaction.response.send_message(f"Okay, your custom role has been set to <@&{role.id}>!!", ephemeral=True)
 
 
 async def setup(client):
