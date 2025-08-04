@@ -17,8 +17,8 @@ services:
     depends_on:
       - ev-mongo
     environment:
-      FOOBERRY_TOKEN: ${FOOBERRY_TOKEN}
-      MONGO_URL: "mongodb://fb-mongo"
+      FOOBERRY_TOKEN: ${PRINCESS_TRIXIE_TOKEN}
+      MONGO_URL: "mongodb://ev-mongo"
     networks:
       - ev-network
     restart: always
