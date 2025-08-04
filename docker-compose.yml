@@ -17,7 +17,8 @@ services:
     depends_on:
       - ev-mongo
     environment:
-      - PRINCESS_TRIXIE_TOKEN=${PRINCESS_TRIXIE_TOKEN}
+      FOOBERRY_TOKEN: ${FOOBERRY_TOKEN}
+      MONGO_URL: "mongodb://fb-mongo"
     networks:
       - ev-network
     restart: always

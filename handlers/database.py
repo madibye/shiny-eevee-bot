@@ -5,7 +5,7 @@ from termcolor import cprint
 
 from config import *
 
-mongo_client = MongoClient(mongo_url)
+mongo_client = MongoClient(mongo_url, directConnection=True)
 database: Database = mongo_client.staff_bot  # Database
 db_reminders: Collection = database.reminders  # Mongo Collection
 db_threads: Collection = database.thread
