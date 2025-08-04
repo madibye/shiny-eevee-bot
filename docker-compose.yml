@@ -7,6 +7,8 @@ services:
       - ev-mongo:/data/db
     ports:
       - "27017"
+    networks:
+      - ev-network
     restart: always
 
   shiny-eevee-bot:
@@ -16,7 +18,12 @@ services:
       - ev-mongo
     environment:
       - PRINCESS_TRIXIE_TOKEN=${PRINCESS_TRIXIE_TOKEN}
+    networks:
+      - ev-network
     restart: always
 
 volumes:
   ev-mongo:
+
+networks:
+  ev-network:
