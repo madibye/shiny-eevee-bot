@@ -1,10 +1,12 @@
 version: '3.0'
 services:
-  mongo:
-    image: mongo:4.2
+  ev-mongo:
+    image: mongo
     container_name: "mongo"
     volumes:
-      - mongo_data:/data/db
+      - ev-mongo:/data/db
+    ports:
+      - "27017"
     restart: always
 
   shiny-eevee-bot:
@@ -17,4 +19,4 @@ services:
     restart: always
 
 volumes:
-  mongo_data:
+  ev-mongo:

@@ -1,4 +1,4 @@
-from typing import List, Coroutine
+from typing import List
 
 from discord.ext.commands import Context
 
