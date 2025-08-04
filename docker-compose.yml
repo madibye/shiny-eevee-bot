@@ -2,7 +2,7 @@ version: '3.0'
 services:
   ev-mongo:
     image: mongo
-    container_name: "mongo"
+    container_name: "ev-mongo"
     volumes:
       - ev-mongo:/data/db
     ports:
@@ -13,7 +13,7 @@ services:
     container_name: "ev"
     build: .
     depends_on:
-      - mongo
+      - ev-mongo
     environment:
       - PRINCESS_TRIXIE_TOKEN=${PRINCESS_TRIXIE_TOKEN}
     restart: always
