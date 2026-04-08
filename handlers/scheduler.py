@@ -166,13 +166,13 @@ async def schedule_loop(bot: ShinyEevee):
                 pass
         if not reminder.channel or not reminder.callback or not reminder.timestamp or (
                 reminder.event_type in NEEDS_TARGET and not reminder.target):
-            cprint(f"Oopsie, something went wrong with a reminder, here's the reminder dict:\n{reminder.raw_data}", "red")
+            cprint(text=f"Oopsie, something went wrong with a reminder, here's the reminder dict:\n{reminder.raw_data}", color="red")
             reminder.remove_from_db()
             continue
         try:
             await reminder.callback()
         except Exception as e:
-            cprint(f'You lost: {e}', 'red')
+            cprint(text=f'You lost: {e}', color='red')
         reminder.remove_from_db()
 
 

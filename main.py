@@ -19,21 +19,21 @@ class ShinyEevee(Bot):
         for extension in config.discord_cogs:
             try:
                 await self.load_extension(extension)
-                cprint(f"Loaded extension {extension}", "green")
+                cprint(text=f"Loaded extension {extension}", color="green")
             except Exception as error:
                 traceback.print_exc()
-                cprint(f"Cog {extension} could not be loaded for reason: {error}", "red")
+                cprint(text=f"Cog {extension} could not be loaded for reason: {error}", color="red")
         for guild in self.guilds:
             await self.tree.sync(guild=Object(guild.id))  # Sync slash commands for each server
             if guild.id in [guild.id for guild in (await self.fetch_user(config.madi_id)).mutual_guilds]:
                 continue
-            cprint(f"Leaving guild {guild.name} {guild.id}", "red")
+            cprint(text=f"Leaving guild {guild.name} {guild.id}", color="red")
             await guild.leave()
         await self.tree.sync()  # Sync our global slash commands
 
     @staticmethod
     async def on_ready():
-        cprint(f"I've logged in as {bot.user.name}. I'm ready to go!", "green")
+        cprint(text=f"I've logged in as {bot.user.name}. I'm ready to go!", color="green")
         await bot.change_presence(activity=Game(name=config.activity_text))
 
 

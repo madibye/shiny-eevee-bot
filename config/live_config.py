@@ -25,7 +25,7 @@ class LiveConfig:
                 setattr(self, name, value)
             else:
                 self.set(name, value)
-        cprint("Successfully loaded all live config values!", "green")
+        cprint(text="Successfully loaded all live config values!", color="green")
 
     def set(self, name, value=None):
         """

@@ -121,21 +121,21 @@ class Roles(commands.Cog, name="roles"):
             if not name:
                 name = interaction.user.display_name
             role = await interaction.guild.create_role(name=name)
-            cprint(f"Created role {name} ({role.id})", "yellow")
+            cprint(text=f"Created role {name} ({role.id})", color="yellow")
             await interaction.user.add_roles(role)
-            cprint(f"Added role {name} ({role.id}) to user {interaction.user.name} {interaction.user.id}", "yellow")
+            cprint(text=f"Added role {name} ({role.id}) to user {interaction.user.name} {interaction.user.id}", color="yellow")
             database.edit_custom_role(str(interaction.guild.id), str(interaction.user.id), role.id)
         else:
             role = interaction.guild.get_role(custom_roles_db.get(str(interaction.guild.id), {}).get(str(interaction.user.id)))
             if role:
                 await interaction.user.add_roles(role)  # Make sure they have the role of course
-                cprint(f"Added role {role.name} ({role.id}) to user {interaction.user.name} {interaction.user.id}", "yellow")
+                cprint(text=f"Added role {role.name} ({role.id}) to user {interaction.user.name} {interaction.user.id}", color="yellow")
         try:
             await role.edit(
                 name=name if name else MISSING,
                 colour=int(color.replace('#', ''), base=16) if color else MISSING,
                 display_icon=icon_file if icon_file else MISSING)
-            cprint(f"Edited role {name} ({role.id})", "yellow")
+            cprint(text=f"Edited role {name} ({role.id})", color="yellow")
         except (Forbidden, HTTPException, ValueError):
             return await interaction.response.send_message(f"Sorry, something went wrong while updating your role.", ephemeral=True)
         return await interaction.response.send_message(f"Okay, your custom role has been set to <@&{role.id}>!!", ephemeral=True)
