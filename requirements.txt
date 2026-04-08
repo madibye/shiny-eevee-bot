@@ -1,9 +1,9 @@
-discord.py==2.5.2
-termcolor==2.0.1
-python-dotenv==1.1.1
+discord.py==2.7.1
+termcolor==3.3.0
+python-dotenv==1.2.2
 python-dateutil==2.9.0.post0
-pymongo==4.13.2
+pymongo==4.16.0
 parsedatetime==2.6
-aiohttp==3.12.15
-numpy==2.3.2
+aiohttp==3.13.5
+numpy==2.4.4
 soundfile==0.13.1
