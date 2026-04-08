@@ -55,6 +55,28 @@ class Fun(Cog, name="Fun"):
         files = generate_type_loops(side_count, type_count)
         await ctx.send("I'm done!! Here you go :)", files=files)
 
+    @command(name="effectiveness", aliases=["eff", "e"])
+    async def effectiveness(self, ctx: Context):
+        type_input: list[PokeType] = [PokeType[t.capitalize()] for t in command_helpers.remove_empty_items(
+            " ".join(command_helpers.parse_args(ctx)).replace("/", " ").lower().split(" "))]
+        types = [t for i, t in enumerate(type_input) if (t not in type_input[:i]) and (t in PokeType)]
+        if not types:
+            return await ctx.send("looks like there's something wrong with the list of types you gave me...")
+        matchups: dict[PokeType, int] = {_type: 1 for _type in PokeType}
+        for def_type in matchups:
+            for mult, mult_types in def_type.type_matchups.items():
+                for mult_type in mult_types:
+                    if mult_type in types:
+                        matchups[def_type] *= mult
+        embed = Embed(title="**Type Matchups**", description=f"{'/'.join([t.name.capitalize() for t in types])}-type")
+        embed.add_field(name="Super Effective", inline=False, value=", ".join(
+            [f"{key.name}{f' ({matchups[key]}x)' if matchups[key] != 2 else ''}" for key in matchups if matchups[key] > 1]))
+        embed.add_field(name="Not Very Effective", inline=False, value=", ".join(
+            [f"{key.name}{f' ({matchups[key]}x)' if matchups[key] != 0.5 else ''}"
+             for key in matchups if matchups[key] < 1 and matchups[key] != 0]))
+        embed.add_field(name="Immune", inline=False, value=", ".join([key.name for key in matchups if matchups[key] == 0]))
+        return await ctx.send(embed=embed)
+
     @command(name="weakness", aliases=["weak", "w"])
     async def weakness(self, ctx: Context):
         type_input: list[PokeType] = [PokeType[t.capitalize()] for t in command_helpers.remove_empty_items(
