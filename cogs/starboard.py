@@ -53,7 +53,7 @@ class Starboard(commands.Cog, name="Starboard"):
                 self.starboarded_messages.append(msg_id)
                 database.update_starboard_db("message_ids", self.starboarded_messages)
             except Exception as e:
-                cprint(f"Message id {msg_id} in channel id {ch_id} could not be starboarded for reason: {e}", "red")
+                cprint(text=f"Message id {msg_id} in channel id {ch_id} could not be starboarded for reason: {e}", color="red")
         self.starboard_msg_queue = set()
 
     @commands.Cog.listener()

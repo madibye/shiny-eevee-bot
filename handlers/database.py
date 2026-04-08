@@ -161,7 +161,7 @@ def update_starboard_db(list_to_edit, new_ids):
 
 def create_config_value(config_id, default_value):
     document = {"_id": config_id, "value": default_value}
-    cprint(f"Creating new db_config entry under \"{document['_id']}\" with value {document['value']}", "yellow")
+    cprint(text=f"Creating new db_config entry under \"{document['_id']}\" with value {document['value']}", color="yellow")
     db_config.insert_one(document)
     return document
 
@@ -170,7 +170,7 @@ def get_config_value(config_id, default_value):
     if document is None:
         document = create_config_value(config_id, default_value)
     if not document:
-        cprint(f"Something went wrong when getting config value `{config_id}`!", "red")
+        cprint(text=f"Something went wrong when getting config value `{config_id}`!", color="red")
     return document["value"]
 
 def get_config_description(config_id):
