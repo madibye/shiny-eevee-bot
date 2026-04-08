@@ -64,7 +64,7 @@ class Fun(Cog, name="Fun"):
             return await ctx.send("looks like there's something wrong with the list of types you gave me...")
         matchups: dict[PokeType, int] = {_type: 1 for _type in PokeType}
         for t in types:
-            for mult, mult_types in t.get_type_matchups().items():
+            for mult, mult_types in t.type_matchups.items():
                 for mult_type in mult_types:
                     matchups[mult_type] *= mult
         embed = Embed(title="**Type Matchups**", description=f"{'/'.join([t.name.capitalize() for t in types])}-type")
